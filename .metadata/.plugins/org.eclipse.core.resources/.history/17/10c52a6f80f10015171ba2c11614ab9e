@@ -1,0 +1,10 @@
+package Obfuscator;
+
+import java.io.File;
+
+public class ob_control {
+	protected String obfuscate_control(File file){
+		return null;
+		
+	}
+}
