@@ -1,7 +1,0 @@
-package Obfuscator;
-
-public class ob_layout {
-	protected String obfuscate_layout (File file){
-		return null;
-	}
-}
