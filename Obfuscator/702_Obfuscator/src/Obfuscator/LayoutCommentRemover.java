@@ -10,19 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class LayoutCommentRemover {
-	protected String removeComments (File file) throws IOException{
-		
-		File obfuscatedFile = new File(System.getProperty("user.dir") + "/" + "obfuscated.txt");
-		
-		if (!obfuscatedFile.exists()) {
-			obfuscatedFile.createNewFile();
-		}
-		
-		FileWriter fw = new FileWriter(obfuscatedFile.getAbsoluteFile());
-		BufferedWriter bw = new BufferedWriter(fw);
-		FileInputStream fis = new FileInputStream(file);
-		
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(fis))) {
+	protected String removeComments (File file, BufferedReader br, BufferedWriter bw) throws IOException{
+
 		    String readLine;
 	    	boolean blockComment = false;
 	    	
@@ -49,12 +38,6 @@ public class LayoutCommentRemover {
 		    	}
 
 		    }
-
-		} catch (FileNotFoundException e) {
-	        e.printStackTrace();  
-	    }
-		
-		bw.close();
 		
 		return null;
 	}
