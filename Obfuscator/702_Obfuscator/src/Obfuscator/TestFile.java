@@ -5,9 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class ExtraDebugInformation {
+public class TestFile {
 
-	public ExtraDebugInformation(){
+	public TestFile(){
 		
 	}
 	
@@ -37,6 +37,14 @@ public class ExtraDebugInformation {
 	public int test(){
 		int i =0;
 		
+		return i;
+		
+	}
+		
+		
+		
+		
+	public void swag(){
 		
 		
 		
@@ -51,13 +59,9 @@ public class ExtraDebugInformation {
 		
 		
 		
-		}
 		
 		
-		if(true){
-			
-			
-			
-		}
+		
+	}
 	
 }
