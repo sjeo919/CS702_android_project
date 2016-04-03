@@ -5,9 +5,9 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
-public class Main {
+public class main {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		//File srcDir = new File(args[0]);
 		//File destDir = new File(args[1]);
@@ -17,7 +17,7 @@ public class Main {
 		//Declare the file path to the java file you're obfuscating.
 		//Uncomment one of the 3 statements below that you're working on. Good luck.
 		
-		String dir = System.getProperty("user.dir");
+		/*String dir = System.getProperty("user.dir");
 		String filePath = dir + "/" + "HelloWorld.java";
 		String output = "";
 		
@@ -30,8 +30,11 @@ public class Main {
 		ExtraDebugInformation x = new ExtraDebugInformation();
 		x.obfuscate();
 		
-		System.out.println(output);
+		System.out.println(output);*/
 		
+		LayoutObfuscator l = new LayoutObfuscator(new File(System.getProperty("user.dir") + "/src/Obfuscator/LayoutObfuscator.java"));
+		l.removeComments();
+		System.out.println(l.getObfuscatedCode());
 	}
 
 }
