@@ -1,5 +1,40 @@
 package Obfuscator;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
 public class LayoutWhitespaceRemover {
+	
+	private String fileContents;
+	
+	public LayoutWhitespaceRemover (File javaFile) throws IOException{
+		fileContents = readFile(javaFile.getAbsolutePath());
+		removeWhitespace(fileContents);
+	}
+	
+	public void removeWhitespace (String s){
+		String whitespaceRemovedString = s.replaceAll("\\s+","");
+		System.out.println(whitespaceRemovedString);
+	}
+	
+	
+	private String readFile(String fileName) throws IOException {
+	    BufferedReader br = new BufferedReader(new FileReader(fileName));
+	    try {
+	        StringBuilder sb = new StringBuilder();
+	        String line = br.readLine();
+
+	        while (line != null) {
+	            sb.append(line);
+	            sb.append("\n");
+	            line = br.readLine();
+	        }
+	        return sb.toString();
+	    } finally {
+	        br.close();
+	    }
+	}
 
 }
