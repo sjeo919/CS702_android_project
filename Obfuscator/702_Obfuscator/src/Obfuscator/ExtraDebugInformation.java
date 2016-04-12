@@ -9,50 +9,16 @@ import java.io.StringReader;
 import java.util.Random;
 
 public class ExtraDebugInformation {
-
-
-	public String inputFile;
-	public String outputFile;
-	
 	
 	public String[] debugInformation;
-	public String[] lines;
 	public ExtraDebugInformation(){
 		debugInformation = new String[]{"Testing", "Main Logic of Code", "Difference of the two variables"};
 	}
 	
-	public void obfuscate() throws IOException{
-		fileToString();
-		insertDebugStatement();
-	}
 	
-	public void fileToString() throws IOException {
-		BufferedReader br = null;
-		StringBuilder sb = new StringBuilder();
-		try {
-			br = new BufferedReader(new FileReader(new File("").getAbsolutePath() + "\\src\\Obfuscator\\TestFile.java"));
-		} catch (FileNotFoundException e){}
+	public String insertDebugStatement(String fileContents) {
 		
-		String line;
-		
-		try {
-			line = br.readLine();
-			while (line != null) {
-				sb.append(line);
-				sb.append("\n");
-				line = br.readLine();
-			}
-		} finally {
-			br.close();
-		}
-		
-		inputFile = sb.toString();
-	}
-	
-	
-	public void insertDebugStatement() {
-		
-		BufferedReader br = new  BufferedReader(new StringReader(inputFile));;
+		BufferedReader br = new  BufferedReader(new StringReader(fileContents));;
 		StringBuilder sb = new StringBuilder();
 		String line;
 		
@@ -86,16 +52,13 @@ public class ExtraDebugInformation {
 				
 			}
 			
-			
-			
-			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		outputFile = sb.toString();
-		System.out.println(outputFile);
+		return sb.toString();
+		//System.out.println(outputFile);
 	}
 	
 	
