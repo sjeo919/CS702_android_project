@@ -10,25 +10,28 @@ public class LayoutWhitespaceRemover {
 	private String fileContents;
 	
 	public LayoutWhitespaceRemover (File javaFile) throws IOException{
-		fileContents = readFile(javaFile.getAbsolutePath());
-		removeWhitespace(fileContents);
-	}
+		fileContents = readFileAndRemoveWhitespace(javaFile.getAbsolutePath());
+		System.out.println(fileContents);
+	}	
 	
-	public void removeWhitespace (String s){
-		String whitespaceRemovedString = s.replaceAll("\\s+","");
-		System.out.println(whitespaceRemovedString);
-	}
-	
-	
-	private String readFile(String fileName) throws IOException {
+	private String readFileAndRemoveWhitespace(String fileName) throws IOException {
 	    BufferedReader br = new BufferedReader(new FileReader(fileName));
 	    try {
 	        StringBuilder sb = new StringBuilder();
 	        String line = br.readLine();
-
+	        
 	        while (line != null) {
-	            sb.append(line);
-	            sb.append("\n");
+	        	
+	        	line = line.trim();
+	        	
+	        	if (line.length() == 0) {
+	        		//Dont append empty lines.
+	        	} else if (line.endsWith(";") || line.endsWith("{") || line.endsWith("}")){
+	        		sb.append(line);
+	        	} else {
+	        		sb.append(line);
+		            sb.append("\n");	
+	        	}
 	            line = br.readLine();
 	        }
 	        return sb.toString();
