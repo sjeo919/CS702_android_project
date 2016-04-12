@@ -11,15 +11,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 
 public class LayoutCommentRemover {
 	
 	protected String removeComments (String fileContents) throws IOException{
 		
-		// convert String into InputStream
-		InputStream is = new ByteArrayInputStream(fileContents.getBytes());
-		// read it with BufferedReader
-		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		BufferedReader br = new BufferedReader(new StringReader(fileContents));
 		
 		try {
 			StringBuilder sb = new StringBuilder();
