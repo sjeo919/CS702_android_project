@@ -57,10 +57,11 @@ public class main {
 		x.obfuscate();
 		
 		System.out.println(output);*/
-		
-//		LayoutObfuscator l = new LayoutObfuscator(new File(System.getProperty("user.dir") + "/src/Obfuscator/LayoutObfuscator.java"));
-//		l.removeComments();
-		//System.out.println(l.getObfuscatedCode());
+		LayoutObfuscator l = new LayoutObfuscator(new File(System.getProperty("user.dir") + "/src/Obfuscator/LayoutObfuscator.java"));
+		l.removeComments();
+		l.obfuscateFieldNames();
+		System.out.println(l.getObfuscatedCode());
+	
 	}
 
 }
