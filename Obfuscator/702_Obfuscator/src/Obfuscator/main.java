@@ -2,6 +2,13 @@ package Obfuscator;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
@@ -9,9 +16,28 @@ public class main {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		//File srcDir = new File(args[0]);
-		//File destDir = new File(args[1]);
-		//FileUtils.copyDirectory(srcDir, destDir);
+		
+		String destDirPath = System.getProperty("user.home") + "/newfolder2";
+		String srcDirPath = System.getProperty("user.home") + "/newfolder";
+//		File srcDir = new File(args[0]);
+//		File destDir = new File(args[1]);
+		File srcDir = new File(srcDirPath);
+		File destDir = new File(destDirPath);
+		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**.java");
+		List<Path> pathList = new ArrayList<Path>();
+		FileUtils.copyDirectory(srcDir, destDir);
+
+		Files.walk(Paths.get(destDirPath)).forEach(filePath -> {
+		    if (Files.isRegularFile(filePath)) {
+				if (matcher.matches(filePath)) {
+					pathList.add(filePath);
+				}
+		    }
+		});
+		
+		for (int i = 0; i < pathList.size(); i++) {
+			System.out.println(pathList.get(i));
+		}
 		
 		//READ HERE GUYS
 		//Declare the file path to the java file you're obfuscating.
@@ -32,8 +58,8 @@ public class main {
 		
 		System.out.println(output);*/
 		
-		LayoutObfuscator l = new LayoutObfuscator(new File(System.getProperty("user.dir") + "/src/Obfuscator/LayoutObfuscator.java"));
-		l.removeComments();
+//		LayoutObfuscator l = new LayoutObfuscator(new File(System.getProperty("user.dir") + "/src/Obfuscator/LayoutObfuscator.java"));
+//		l.removeComments();
 		//System.out.println(l.getObfuscatedCode());
 	}
 
