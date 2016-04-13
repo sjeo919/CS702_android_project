@@ -1,13 +1,18 @@
 package Obfuscator;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
@@ -52,10 +57,13 @@ public class LayoutObfuscator {
 	/**
 	 * Parse the source file into an abstract syntax tree using the JavaParser library. 
 	 * @param javaSourceFile
+	 * @throws ParseException 
+	 * @throws IOException 
 	 */
-	public LayoutObfuscator(File javaSourceFile) throws Exception {
+	
+	public String Obfuscate(String fileContents) throws ParseException, IOException {
 		
-		FileInputStream in = new FileInputStream(javaSourceFile);
+		InputStream in = new ByteArrayInputStream(fileContents.getBytes());
         try {
             // parse the file
             cu = JavaParser.parse(in);
@@ -63,6 +71,9 @@ public class LayoutObfuscator {
             in.close();
         }
         
+        //add implementation, methods calls here.
+		
+		return cu.toString(); // this should return the final obfuscated code from this class
 	}
 	
 	/**
@@ -115,14 +126,6 @@ public class LayoutObfuscator {
 	public void resetStringGen() {
 		stringGenID = 0;
 	}
-	
-	/**
-	 * Call this to get the obfuscated code as a string.
-	 * @return
-	 */
-	public String getObfuscatedCode() {
-		return cu.toString();
-	} 
     
     private class VariableRegisterVisitor extends VoidVisitorAdapter<Object> {
     	    	

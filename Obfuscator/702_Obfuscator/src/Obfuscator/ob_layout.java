@@ -11,7 +11,7 @@ import java.io.InputStreamReader;
 
 public class ob_layout {
 	protected static String obfuscate_layout (File file) throws IOException{
-		
+		/*
 		File obfuscatedFile = new File(System.getProperty("user.dir") + "/" + "obfuscated.txt");
 
 		LayoutCommentRemover cr = new LayoutCommentRemover();
@@ -31,7 +31,7 @@ public class ob_layout {
 		}
 		
 		bw.close();
-		
+		*/
 		return null;
 	}
 }

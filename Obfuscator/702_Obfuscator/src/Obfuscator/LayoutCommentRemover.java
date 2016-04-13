@@ -2,24 +2,35 @@ package Obfuscator;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 
 public class LayoutCommentRemover {
-	protected String removeComments (File file, BufferedReader br, BufferedWriter bw) throws IOException{
-
-		    String readLine;
-	    	boolean blockComment = false;
-	    	
-		    while ((readLine = br.readLine()) != null) {
-		    	String line = readLine.trim();
-		    	String[] words = line.split("\\s+");
-		    	String writeLine = "";
-		    	if(words[0].equals("/**") || words[0].equals("*")){
+	
+	protected String removeComments (String fileContents) throws IOException{
+		
+		BufferedReader br = new BufferedReader(new StringReader(fileContents));
+		
+		try {
+			StringBuilder sb = new StringBuilder();
+	        String line = br.readLine();
+	        boolean blockComment = false;
+	        
+	        while (line != null) {
+	        	
+	        	line = line.trim();
+	        	String[] words = line.split("\\s+");
+	        	String writeLine = "";
+	        	
+	        	if(words[0].equals("/**") || words[0].equals("*")){
 		    		blockComment = true; ////// also check for when * is missing
 		    	} else if (words[0].equals("*/")) {
 		    		blockComment = false;
@@ -32,14 +43,16 @@ public class LayoutCommentRemover {
 			   			}
 			   		}
 			    	if(!writeLine.equals("")){
-				    	bw.write(writeLine);
-				    	bw.newLine();
+				    	sb.append(writeLine);
+				    	sb.append("\n");
 			    	}
 		    	}
-
-		    }
-		
-		return null;
+	        	line = br.readLine();
+	        }
+	        return sb.toString();
+			
+		} finally {
+			br.close();
+		}
 	}
-
 }

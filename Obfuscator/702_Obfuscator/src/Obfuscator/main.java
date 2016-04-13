@@ -16,7 +16,7 @@ public class main {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		
+		/*
 		String destDirPath = System.getProperty("user.home") + "/newfolder2";
 		String srcDirPath = System.getProperty("user.home") + "/newfolder";
 //		File srcDir = new File(args[0]);
@@ -38,7 +38,7 @@ public class main {
 		for (int i = 0; i < pathList.size(); i++) {
 			System.out.println(pathList.get(i));
 		}
-		
+		*/
 		//READ HERE GUYS
 		//Declare the file path to the java file you're obfuscating.
 		//Uncomment one of the 3 statements below that you're working on. Good luck.
@@ -57,10 +57,9 @@ public class main {
 		x.obfuscate();
 		
 		System.out.println(output);*/
-		LayoutObfuscator l = new LayoutObfuscator(new File(System.getProperty("user.dir") + "/src/Obfuscator/LayoutObfuscator.java"));
-		l.removeComments();
-		l.obfuscateFieldNames();
-		System.out.println(l.getObfuscatedCode());
+		LayoutObfuscator l = new LayoutObfuscator();
+		FileToStringConverter fc = new FileToStringConverter();
+		l.Obfuscate(fc.read(new File(System.getProperty("user.dir") + "/src/Obfuscator/LayoutObfuscator.java")));
 	
 	}
 
