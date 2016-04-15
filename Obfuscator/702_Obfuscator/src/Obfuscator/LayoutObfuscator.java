@@ -48,49 +48,66 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
  */
 public class LayoutObfuscator {
 	
-	private CompilationUnit cu;
-
-	private int stringGenID = 0;
-	private Map<String, String> globalNameMap = new HashMap<String, String>();
-
+	private LayoutObfuscator() {}
 	
 	/**
-	 * Parse the source file into an abstract syntax tree using the JavaParser library. 
-	 * @param javaSourceFile
-	 * @throws ParseException 
-	 * @throws IOException 
+	 * The main layout obfuscation method. Takes a list of java source files (as strings) 
+	 * that should be obfuscated together as input, and returns a list of obfuscated source
+	 * files, in the same order.
 	 */
-	
-	public String Obfuscate(String fileContents) throws ParseException, IOException {
+	public static List<String> Obfuscate(List<String> programFiles) throws ParseException, IOException {
 		
-		InputStream in = new ByteArrayInputStream(fileContents.getBytes());
-        try {
-            // parse the file
-            cu = JavaParser.parse(in);
-        } finally {
-            in.close();
-        }
+		List<CompilationUnit> fileASTs = new ArrayList<CompilationUnit>();
+		Map<String, String> globalNameMap = new HashMap<String, String>();
+		int stringGenID = 0;
+
+		// Parse each program file into an abstract syntax tree using JavaParser library.
+		for (String file : programFiles) {
+			InputStream in = new ByteArrayInputStream(file.getBytes());
+			try {
+				fileASTs.add(JavaParser.parse(in));
+			} finally {
+				in.close();
+			}
+		}
         
-        //add implementation, methods calls here.
+		for (CompilationUnit fileAST : fileASTs) {
+			
+			// Remove comments from each file
+			List<Node> ASTs = new ArrayList<Node>();
+			ASTs.add(fileAST);
+			recursiveRemoveComment(ASTs);
+			
+			// Search for all classes/interfaces(types) and register them in the
+			// global name space.
+			
+			// Remove types that implements/extends non-user-defined types from the
+			// name space.
+			
+			// Register all methods from the remaining user-defined types.
+			
+			// Register all fields/variable from the user-defined types.
+			
+			// Rename all method and variables, provided that they are not
+			// invoked from a non-user-defined type.
+			
+			// Rename all user-defined types.
+			
+		}
 		
-		return cu.toString(); // this should return the final obfuscated code from this class
-	}
-	
-	/**
-	 * Call this method to remove all comments in the parsed source file.
-	 */
-	public void removeComments() {
 		
-		List<Node> ast = new ArrayList<Node>();
-		ast.add(cu);
-		recursiveRemoveComment(ast);
+        List<String> obfuscatedFiles = new ArrayList<String>();
+        for (CompilationUnit fileAST : fileASTs) {
+        	obfuscatedFiles.add(fileAST.toString());
+        }
+		return obfuscatedFiles; // this should return the final obfuscated code from this class
 	}
 	
 	/**
 	 * Recursively traverse all nodes in the AST and remove related 'comment nodes' from each.
 	 * @param nodes
 	 */
-	private void recursiveRemoveComment(List<Node> nodes) {
+	private static void recursiveRemoveComment(List<Node> nodes) {
 		if (nodes != null) {
 			for (Node n : nodes) {
 				n.setComment(null);
