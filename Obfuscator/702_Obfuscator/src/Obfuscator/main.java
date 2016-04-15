@@ -29,6 +29,7 @@ public class main {
 		FileUtils.deleteDirectory(destDir); //delete dest(output) directory incase it already exists.
 		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**.java");
 		List<FileModel> FileList = new ArrayList<FileModel>();
+		List<FileModel> FileList2 = new ArrayList<FileModel>();
 		
 		FileUtils.copyDirectory(srcDir, destDir);
 
@@ -48,30 +49,30 @@ public class main {
 		});
 		
 		//instantiate obfuscator classes.
-		LayoutObfuscator layoutObfuscator = new LayoutObfuscator();
 		ExtraDebugInformation extraDebugInformation = new ExtraDebugInformation();
 		LayoutCommentRemover layoutCommentRemover = new LayoutCommentRemover();
 		LayoutWhitespaceRemover layoutWhitespaceRemover = new LayoutWhitespaceRemover();
 		
+		FileList2 = LayoutObfuscator.Obfuscate(FileList);
 		
-		for (int i = 0; i < FileList.size(); i++) {
+		
+		for (int i = 0; i < FileList2.size(); i++) {
 			String output = "";
 			
-			output = FileList.get(i).getFileContentBefore();
+			output = FileList2.get(i).getFileContentBefore();
 			
 			//comment out lines below depending on which obfuscations you'd like to run (note. whitespaceRemover requires commentRemover to be run prior)
-			//output = layoutObfuscator.Obfuscate(output);
-			//output = extraDebugInformation.insertDebugStatement(output);
+			output = extraDebugInformation.insertDebugStatement(output);
 			output = layoutCommentRemover.removeComments(output);
-			//output = layoutWhitespaceRemover.removeWhitespace(output);
+			output = layoutWhitespaceRemover.removeWhitespace(output);
 			
-			FileList.get(i).setFileContentAfter(output);
+			FileList2.get(i).setFileContentAfter(output);
 		}	
 		
-		for (int i = 0; i < FileList.size(); i++) {
-			if (FileList.get(i).getFileContentAfter() != "") {
-				PrintWriter writer = new PrintWriter(FileList.get(i).getFilePath().toString());
-				writer.println(FileList.get(i).getFileContentAfter());
+		for (int i = 0; i < FileList2.size(); i++) {
+			if (FileList2.get(i).getFileContentAfter() != "") {
+				PrintWriter writer = new PrintWriter(FileList2.get(i).getFilePath().toString());
+				writer.println(FileList2.get(i).getFileContentAfter());
 				writer.close();
 			}
 		}

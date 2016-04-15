@@ -55,7 +55,7 @@ public class LayoutObfuscator {
 	 * that should be obfuscated together as input, and returns a list of obfuscated source
 	 * files, in the same order.
 	 */
-	public static List<String> Obfuscate(List<String> programFiles) throws ParseException, IOException {
+	public static List<FileModel> Obfuscate(List<FileModel> programFiles) throws ParseException, IOException {
 		
 		List<CompilationUnit> fileASTs = new ArrayList<CompilationUnit>();
 		Map<String, String> globalNameMap = new HashMap<String, String>();
