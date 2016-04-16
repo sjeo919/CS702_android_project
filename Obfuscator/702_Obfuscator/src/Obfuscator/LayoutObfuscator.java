@@ -50,20 +50,20 @@ public class LayoutObfuscator {
 	
 	private LayoutObfuscator() {}
 	
+	private static List<CompilationUnit> fileASTs = new ArrayList<CompilationUnit>();
+	private static Map<String, String> globalNameMap = new HashMap<String, String>();
+	private static int stringGenID = 0;
+	
 	/**
 	 * The main layout obfuscation method. Takes a list of java source files (as strings) 
 	 * that should be obfuscated together as input, and returns a list of obfuscated source
 	 * files, in the same order.
 	 */
 	public static List<FileModel> Obfuscate(List<FileModel> programFiles) throws ParseException, IOException {
-		
-		List<CompilationUnit> fileASTs = new ArrayList<CompilationUnit>();
-		Map<String, String> globalNameMap = new HashMap<String, String>();
-		int stringGenID = 0;
 
 		// Parse each program file into an abstract syntax tree using JavaParser library.
-		for (String file : programFiles) {
-			InputStream in = new ByteArrayInputStream(file.getBytes());
+		for (int i = 0; i < programFiles.size(); i++) {
+			InputStream in = new ByteArrayInputStream(programFiles.get(i).getFileContentBefore().getBytes());
 			try {
 				fileASTs.add(JavaParser.parse(in));
 			} finally {
@@ -94,13 +94,11 @@ public class LayoutObfuscator {
 			// Rename all user-defined types.
 			
 		}
-		
-		
-        List<String> obfuscatedFiles = new ArrayList<String>();
-        for (CompilationUnit fileAST : fileASTs) {
-        	obfuscatedFiles.add(fileAST.toString());
+				
+        for (int i = 0; i < fileASTs.size(); i++) {
+        	programFiles.get(i).setFileContentAfter((fileASTs.get(i).toString()));
         }
-		return obfuscatedFiles; // this should return the final obfuscated code from this class
+		return programFiles;
 	}
 	
 	/**
@@ -118,11 +116,6 @@ public class LayoutObfuscator {
 				recursiveRemoveComment(n.getChildrenNodes());
 			}
 		}
-	}
-	
-	public void obfuscateFieldNames() {
-		new VariableRegisterVisitor().visit(cu, null);
-		new NameChangeVisitor().visit(cu, null);
 	}
 	
 	/**
