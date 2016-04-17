@@ -21,7 +21,7 @@ public class main {
 		// TODO Auto-generated method stub
 		
 		String destDirPath = System.getProperty("user.home") + "/702_Obfuscator/MusicPlayer_ob";
-		String srcDirPath = System.getProperty("user.home") + "/702_Obfuscator/MusicPlayer";
+		String srcDirPath = System.getProperty("user.dir") + "/src/Obfuscator";
 //		File srcDir = new File(args[0]);
 //		File destDir = new File(args[1]);
 		File srcDir = new File(srcDirPath);
@@ -49,14 +49,14 @@ public class main {
 		});
 		
 		//instantiate obfuscator classes.
+		LayoutObfuscator layoutObfuscator = new LayoutObfuscator();
 		ExtraDebugInformation extraDebugInformation = new ExtraDebugInformation();
 		LayoutCommentRemover layoutCommentRemover = new LayoutCommentRemover();
 		LayoutWhitespaceRemover layoutWhitespaceRemover = new LayoutWhitespaceRemover();
 		
-		FileList2 = LayoutObfuscator.Obfuscate(FileList);
+		FileList2 = layoutObfuscator.Obfuscate(FileList);
 		
-		
-		for (int i = 0; i < FileList2.size(); i++) {
+		/*for (int i = 0; i < FileList2.size(); i++) {
 			String output = "";
 			
 			output = FileList2.get(i).getFileContentBefore();
@@ -75,6 +75,6 @@ public class main {
 				writer.println(FileList2.get(i).getFileContentAfter());
 				writer.close();
 			}
-		}
+		}*/
 	}
 }
