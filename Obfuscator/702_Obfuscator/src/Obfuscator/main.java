@@ -31,27 +31,38 @@ public class main {
 		List<FileModel> FileList = new ArrayList<FileModel>();
 		List<FileModel> FileList2 = new ArrayList<FileModel>();
 		
-		FileUtils.copyDirectory(srcDir, destDir);
+		
+		//uncomment below
+		
+//		FileUtils.copyDirectory(srcDir, destDir);
+//
+//		FileToStringConverter fc = new FileToStringConverter();
+//		Files.walk(Paths.get(destDirPath)).forEach(filePath -> {
+//		    if (Files.isRegularFile(filePath)) {
+//				if (matcher.matches(filePath)) {
+//					try {
+//						String s1 = fc.read(new File(filePath.toString()));
+//						FileList.add(new FileModel(s1,"",filePath));
+//					} catch (Exception e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//				}
+//		    }
+//		});
+		
+		//uncomment til here after done
+		
 
-		FileToStringConverter fc = new FileToStringConverter();
-		Files.walk(Paths.get(destDirPath)).forEach(filePath -> {
-		    if (Files.isRegularFile(filePath)) {
-				if (matcher.matches(filePath)) {
-					try {
-						String s1 = fc.read(new File(filePath.toString()));
-						FileList.add(new FileModel(s1,"",filePath));
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-		    }
-		});
+		
 		
 		//instantiate obfuscator classes.
 		ExtraDebugInformation extraDebugInformation = new ExtraDebugInformation();
+		LayoutExtraCode layoutExtraCode = new LayoutExtraCode();
 		LayoutCommentRemover layoutCommentRemover = new LayoutCommentRemover();
 		LayoutWhitespaceRemover layoutWhitespaceRemover = new LayoutWhitespaceRemover();
+		
+		System.out.println(layoutExtraCode.addDebugInformation(""));
 		
 		FileList2 = LayoutObfuscator.Obfuscate(FileList);
 		
