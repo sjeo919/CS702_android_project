@@ -11,6 +11,7 @@ import java.util.Random;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -26,21 +27,19 @@ import com.github.javaparser.ParseException;
 public class LayoutExtraCode {
 
 	private CompilationUnit cu;
+	private Random random;
+	
+	public LayoutExtraCode(){
+		random = new Random();
+	}
 	
 	public String addDebugInformation(String fileContents){
-		
-		
-
 		initializeCompilationUnit(fileContents);
-		
-    	
-		
-		changeMethods();
-		
-		
-		
+		//iterates through each method of the compilationUnit and 
+		//then iterates through the method body's statements to add
+		//random "log" messages.
+		changeMethods(true);
 
-		
 		return cu.toString();
 	}
 	
@@ -49,79 +48,73 @@ public class LayoutExtraCode {
 	
 	public String addNewMethods(String fileContents){
 		
+		initializeCompilationUnit(fileContents);
+		
+		MethodDeclaration method = new MethodDeclaration();
+		
+		changeMethods(false);
 		return cu.toString();
 	}
 	
 	
-    private void changeMethods() {
+    private void changeMethods(boolean randomDebug) {
     	
         List<TypeDeclaration> types = cu.getTypes();
 
         for (TypeDeclaration type : types) {
             List<BodyDeclaration> members = type.getMembers();
-            
-            for (BodyDeclaration member : members) {
-                if (member instanceof MethodDeclaration) {
-                    MethodDeclaration method = (MethodDeclaration) member;
-                    addToMethod(method, null);
+            System.out.println(members);
+            if(!randomDebug){
+            	//members.add(generateRandomMethod());
+            	System.out.println(members.add(members.get(0)));
+            }else{
+            	for (BodyDeclaration member : members) {
+                    if (member instanceof MethodDeclaration) {
+                        MethodDeclaration method = (MethodDeclaration) member;
+                        addToMethod(method, null);
+                    }
                 }
             }
+            
         }
     }
 
 	
 	
 	private void addToMethod(MethodDeclaration method, Statement statement) {
-    	
 		BlockStmt body = method.getBody();
-		
-		int random = getRandomIndex(body.getStmts().size());
-        System.out.println(random);
-        
-        
+		        
 		if (body==null) {
 			body = new BlockStmt();
 			method.setBody(body);
 		}
-		
 		if (body.getStmts()==null) {
-			System.out.println("does it go here");
 			body.setStmts(new ArrayList<Statement>());
 		}
 		
-//		System.out.println(body.getStmts());
 		
-        NameExpr clazz = new NameExpr("System");
-        FieldAccessExpr field = new FieldAccessExpr(clazz, "out");
-        MethodCallExpr call = new MethodCallExpr(field, "println");
-        ASTHelper.addArgument(call, new StringLiteralExpr("Hello World!"));
-        
-        System.out.println(call.getName());
-        
-        //ASTHelper.addStmt(body, call);
-        random = getRandomIndex(body.getStmts().size());
-        System.out.println(body.getStmts().size());
-        body.getStmts().add(random, new ExpressionStmt(call));
-    
-        
+        for(int i = 0; i < body.getStmts().size(); i++){
+        	if(random.nextInt(10) > 4){
+        		MethodCallExpr call = randomLogStatement();
+        		body.getStmts().add(i, new ExpressionStmt(call));
+        	}
+        }
 	}
 
-	private MethodCallExpr addDebugStatement(){
+	private MethodCallExpr randomLogStatement(){
+		String[] logTypes = new String[]{"v", "d", "i", "w", "e"};
+		String logType = logTypes[new Random().nextInt(5)];
 		
-		
-		
-		return null;
-		
+        NameExpr clazz = new NameExpr("Log");
+        MethodCallExpr call = new MethodCallExpr(clazz, logType);
+        ASTHelper.addArgument(call, new StringLiteralExpr(generateRandomString()));
+        ASTHelper.addArgument(call, new StringLiteralExpr(generateRandomString()));
+
+        return call;
 	} 
 
 	
-	
-	
-	
-	
-	
-	
-	
+
 	private void initializeCompilationUnit(String fileContents){
 		InputStream in = null;
 		//InputStream in = new ByteArrayInputStream(fileContents.getBytes());
@@ -139,11 +132,35 @@ public class LayoutExtraCode {
 		
 	}
 	
-	public int getRandomIndex(int size){
-		Random rand = new Random();
-	    int randomNum = rand.nextInt(size + 1);
-
-	    return randomNum;
-
+	private MethodDeclaration generateRandomMethod(){
+		//initialize a method
+		MethodDeclaration method = new MethodDeclaration();
+		//add parameters to the method
+		ASTHelper.addParameter(method, new Parameter());
+		
+		
+		BlockStmt body = method.getBody();
+        
+		if (body==null) {
+			body = new BlockStmt();
+			method.setBody(body);
+		}
+		if (body.getStmts()==null) {
+			body.setStmts(new ArrayList<Statement>());
+		}
+		
+		
+		return method;
+	}
+	
+	private String generateRandomString(){
+		int length = 20;
+		String characters = "abcdefghijklmnopqrstuvwxyz";
+	    char[] text = new char[length];
+	    for (int i = 0; i < length; i++)
+	    {
+	        text[i] = characters.charAt(random.nextInt(characters.length()));
+	    }
+	    return new String(text);
 	}
 }

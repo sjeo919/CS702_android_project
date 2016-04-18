@@ -63,6 +63,7 @@ public class main {
 		LayoutWhitespaceRemover layoutWhitespaceRemover = new LayoutWhitespaceRemover();
 		
 		System.out.println(layoutExtraCode.addDebugInformation(""));
+		//System.out.println(layoutExtraCode.addNewMethods(""));
 		
 		FileList2 = LayoutObfuscator.Obfuscate(FileList);
 		
