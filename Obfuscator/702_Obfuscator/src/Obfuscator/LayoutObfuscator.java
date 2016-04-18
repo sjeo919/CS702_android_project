@@ -40,6 +40,7 @@ import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
+import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.MethodReferenceExpr;
@@ -91,7 +92,7 @@ public class LayoutObfuscator {
 				in.close();
 			}
 		}
-		
+				
 		for (CompilationUnit fileAST : fileASTs) {
 		
 			// Search for all classes/interfaces(types) and register them in the
@@ -137,7 +138,7 @@ public class LayoutObfuscator {
 		
 		for (CompilationUnit fileAST : fileASTs) {
 			new NameChangeVisitor().visit(fileAST, null);
-			//System.out.println(fileAST.toString());
+			System.out.println(fileAST.toString());
 		}
 			
         for (int i = 0; i < fileASTs.size(); i++) {
@@ -229,7 +230,20 @@ public class LayoutObfuscator {
 						globalMethodList.add(((MethodDeclaration)bd).getName());
 					}
 				}
-    		}	
+    		} else {
+    			for (BodyDeclaration bd : d.getMembers()) {
+					if (bd instanceof MethodDeclaration) {
+						boolean isOverride = false;
+						for (AnnotationExpr a : bd.getAnnotations()) {
+							if (a.getName().getName().equals("Override")){
+								isOverride = true;
+							}
+						}
+						if (!isOverride)
+							globalMethodList.add(((MethodDeclaration)bd).getName());
+					}
+				}
+    		}
 		}
     	
     }
