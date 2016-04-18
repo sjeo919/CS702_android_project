@@ -173,12 +173,13 @@ public class LayoutObfuscator {
 	 */
 	private String generateUniqueString() {	
 		String s = Integer.toString(stringGenID);
+		String s2 = "";
 		stringGenID++;
 		Random r = new Random();
 		for (int i = 0; i < 60; i++) {
-			s = s + r.nextInt(100);
+			s2 = s2 + r.nextInt(100);
 		}
-		return "$" + s;
+		return "$" + s2 + s;
 	}
 	
 	/**
