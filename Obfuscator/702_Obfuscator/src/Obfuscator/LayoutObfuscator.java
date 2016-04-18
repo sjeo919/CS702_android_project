@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseException;
@@ -173,7 +174,11 @@ public class LayoutObfuscator {
 	private String generateUniqueString() {	
 		String s = Integer.toString(stringGenID);
 		stringGenID++;
-		return "a" + s;
+		Random r = new Random();
+		for (int i = 0; i < 60; i++) {
+			s = s + r.nextInt(100);
+		}
+		return "$" + s;
 	}
 	
 	/**
