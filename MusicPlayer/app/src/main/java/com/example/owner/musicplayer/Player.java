@@ -1,43 +1,57 @@
 package com.example.owner.musicplayer;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
+import com.example.owner.musicplayer.MusicService.MyLocalBinder;
 
-public class Player extends AppCompatActivity implements View.OnClickListener {
+public class Player extends AppCompatActivity implements MediaPlayer.OnCompletionListener, SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
-    static MediaPlayer mp;
+    private static final String TAG = "LogMessage";
     ArrayList<File> mySongs;
     int position;
-    Uri u;
     Thread updateSeekBar;
 
     SeekBar sb;
     Button btPlay, btFf, btRw, btNext, btPrev;
+    TextView songName;
+    ImageView albumArt;
+
+    boolean isBound = false;
+    MusicService musicService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+
+        Intent i = new Intent(this, MusicService.class);
+        bindService(i, musicConnection, Context.BIND_AUTO_CREATE);
 
         btPlay = (Button) findViewById(R.id.btPlay);
         btFf = (Button) findViewById(R.id.btFf);
         btRw = (Button) findViewById(R.id.btRw);
         btNext = (Button) findViewById(R.id.btNext);
         btPrev = (Button) findViewById(R.id.btPrev);
+        songName = (TextView) findViewById(R.id.songName);
 
         btPlay.setOnClickListener(this);
         btFf.setOnClickListener(this);
@@ -45,59 +59,62 @@ public class Player extends AppCompatActivity implements View.OnClickListener {
         btNext.setOnClickListener(this);
         btPrev.setOnClickListener(this);
 
+        albumArt = (ImageView) findViewById(R.id.albumView);
+
         sb = (SeekBar) findViewById(R.id.seekBar);
         updateSeekBar = new Thread() {
             @Override
             public void run() {
-                int totalDuration = mp.getDuration();
+                int totalDuration = musicService.getDuration();
                 int currentPosition = 0;
                 sb.setMax(totalDuration);
 
                 while (currentPosition < totalDuration) {
                     try {
-                        sleep(500);
-                        currentPosition = mp.getCurrentPosition();
+                        Thread.sleep(500);
+                        currentPosition = musicService.getCurPosition();
                         sb.setProgress(currentPosition);
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
+
             }
         };
 
-        if (mp != null) {
-            mp.stop();
-            mp.release();
-        }
-
-        Intent i = getIntent();
-        Bundle b = i.getExtras();
+        Intent in = getIntent();
+        Bundle b = in.getExtras();
         mySongs = (ArrayList) b.getParcelableArrayList("songlist");
-        position = b.getInt("pos",0);
+        position = b.getInt("pos", 0);
+        sb.setOnSeekBarChangeListener(this);
+    }
 
-        u = Uri.parse(mySongs.get(position).toString());
-        mp = MediaPlayer.create(getApplicationContext(), u);
-        mp.start();
-        sb.setMax(mp.getDuration());
 
+    public void init() {
+        musicService.startPlayer();
+        songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+        changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
+        sb.setMax(musicService.getDuration());
         updateSeekBar.start();
+    }
 
-        sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                mp.seekTo(seekBar.getProgress());
-            }
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        musicService.seekTo(seekBar.getProgress());
+    }
 
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
-            }
+    }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
 
-            }
-        });
+    }
+
+    public void changeAlbumArt (Uri uri) {
+        albumArt.setImageBitmap(musicService.findAlbumArt(uri, null));
     }
 
     @Override
@@ -127,43 +144,56 @@ public class Player extends AppCompatActivity implements View.OnClickListener {
         int id = v.getId();
         switch (id) {
             case R.id.btPlay:
-                if (mp.isPlaying()) {
-                    mp.pause();
-                    btPlay.setText(">");
-                } else {
-                    mp.start();
-                    btPlay.setText("||");
-                }
+                btPlay.setText(musicService.playButton());
                 break;
             case R.id.btFf:
-                mp.seekTo(mp.getCurrentPosition()+5000);
+                if (musicService.fastForward()) {
+                    changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
+                    songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+                }
                 break;
             case R.id.btRw:
-                mp.seekTo(mp.getCurrentPosition()-5000);
+                if (musicService.rewind()) {
+                    changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
+                    songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+                }
                 break;
             case R.id.btNext:
-                mp.stop();
-                mp.release();
-                position = (position+1)%mySongs.size();
-                u = Uri.parse(mySongs.get(position).toString());
-                mp = MediaPlayer.create(getApplicationContext(), u);
-                mp.start();
-                sb.setMax(mp.getDuration());
+                musicService.playNext();
+                changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
+                songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+//                sb.setProgress(0);
+                sb.setMax(musicService.getDuration());
+//                updateSeekBar.start();
                 break;
             case R.id.btPrev:
-                mp.stop();
-                mp.release();
-                position = (position-1<0) ? mySongs.size()-1 : position-1;
-//                if (position-1 < 0) {
-//                    position = mySongs.size()-1;
-//                } else {
-//                    position = position-1;
-//                }
-                u = Uri.parse(mySongs.get(position).toString());
-                mp = MediaPlayer.create(getApplicationContext(),u);
-                mp.start();
-                sb.setMax(mp.getDuration());
+                musicService.playPrev();
+                changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
+                songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+//                sb.setProgress(0);
+                sb.setMax(musicService.getDuration());
+//                updateSeekBar.start();
                 break;
         }
+    }
+
+    private ServiceConnection musicConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MyLocalBinder binder = (MyLocalBinder) service;
+            musicService = binder.getService();
+            isBound = true;
+            init();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            isBound = false;
+        }
+    };
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        Log.i(TAG, "OnCompletion method entered!");
     }
 }
