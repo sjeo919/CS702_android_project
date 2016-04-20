@@ -124,19 +124,6 @@ public class LayoutObfuscator {
 			
 		}
 		
-		/*for (String name : globalTypeList) {
-			globalNameMap.put(name, generateUniqueString());
-		}
-		resetStringGen();
-		for (String name : globalMethodList) {
-			globalNameMap.put(name, generateUniqueString());
-		}
-		resetStringGen();
-		for (String name : globalVariableList) {
-			globalNameMap.put(name, generateUniqueString());
-		}
-		resetStringGen();*/
-		
 		for (CompilationUnit fileAST : fileASTs) {
 			new NameChangeVisitor().visit(fileAST, null);
 			System.out.println(fileAST.toString());
@@ -290,6 +277,9 @@ public class LayoutObfuscator {
     		if (globalVariableList.containsKey(d.getName())) {
     			d.setName(globalVariableList.get(d.getName()));
     		}
+    		if (globalTypeList.containsKey(d.getName())) {
+    			d.setName(globalTypeList.get(d.getName()));
+    		}
     	}
     	
     	@Override 
@@ -318,6 +308,14 @@ public class LayoutObfuscator {
     	
     	@Override 
     	public void visit(final ConstructorDeclaration d, Object arg) {
+    		super.visit(d, arg);
+    		if (globalTypeList.containsKey(d.getName())) {
+    			d.setName(globalTypeList.get(d.getName()));
+    		}
+    	}
+    	
+    	@Override 
+    	public void visit(final QualifiedNameExpr d, Object arg) {
     		super.visit(d, arg);
     		if (globalTypeList.containsKey(d.getName())) {
     			d.setName(globalTypeList.get(d.getName()));
