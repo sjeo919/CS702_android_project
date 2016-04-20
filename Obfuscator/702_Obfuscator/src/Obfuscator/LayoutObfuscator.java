@@ -10,13 +10,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.AnnotationMemberDeclaration;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.EmptyTypeDeclaration;
@@ -29,12 +33,22 @@ import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.comments.LineComment;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.ArrayAccessExpr;
+import com.github.javaparser.ast.expr.ArrayCreationExpr;
+import com.github.javaparser.ast.expr.ArrayInitializerExpr;
+import com.github.javaparser.ast.expr.AssignExpr;
+import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
+import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.MethodReferenceExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.QualifiedNameExpr;
+import com.github.javaparser.ast.expr.UnaryExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
@@ -44,22 +58,31 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 /**
  * Class that provides various utility methods to obfuscate the layout of a java file.
+ * It uses the JavaParser open source library (https://github.com/javaparser) to 
+ * parse and manipulate the file contents.
  * @author Jonny Lu
  */
 public class LayoutObfuscator {
 	
-	private LayoutObfuscator() {}
+	private List<CompilationUnit> fileASTs;
+	private List<String> globalTypeList;
+	private List<String> globalNonUserTypeList;
+	private List<String> globalMethodList;
+	private List<String> globalVariableList;
+	private Map<String, String> globalNameMap;
+	private int stringGenID = 0;
 	
-	private static List<CompilationUnit> fileASTs = new ArrayList<CompilationUnit>();
-	private static Map<String, String> globalNameMap = new HashMap<String, String>();
-	private static int stringGenID = 0;
-	
-	/**
-	 * The main layout obfuscation method. Takes a list of java source files (as strings) 
-	 * that should be obfuscated together as input, and returns a list of obfuscated source
-	 * files, in the same order.
-	 */
-	public static List<FileModel> Obfuscate(List<FileModel> programFiles) throws ParseException, IOException {
+	public LayoutObfuscator() {
+		fileASTs = new ArrayList<CompilationUnit>();
+		globalTypeList = new ArrayList<String>();
+		globalNonUserTypeList = new ArrayList<String>();
+		globalMethodList = new ArrayList<String>();
+		globalVariableList = new ArrayList<String>();
+		globalNameMap = new HashMap<String, String>();
+		stringGenID = 0;
+	}
+
+	public List<FileModel> Obfuscate(List<FileModel> programFiles) throws ParseException, IOException {
 
 		// Parse each program file into an abstract syntax tree using JavaParser library.
 		for (int i = 0; i < programFiles.size(); i++) {
@@ -70,31 +93,55 @@ public class LayoutObfuscator {
 				in.close();
 			}
 		}
+				
+		for (CompilationUnit fileAST : fileASTs) {
+		
+			// Search for all classes/interfaces(types) and register them in the
+			// global name space.
+			new TypeRegisterVisitor().visit(fileAST, null);
+		
+		}
         
 		for (CompilationUnit fileAST : fileASTs) {
+			
+			//CompilationUnit fileAST = fileASTs.get(4);
 			
 			// Remove comments from each file
 			List<Node> ASTs = new ArrayList<Node>();
 			ASTs.add(fileAST);
 			recursiveRemoveComment(ASTs);
 			
-			// Search for all classes/interfaces(types) and register them in the
-			// global name space.
-			
-			// Remove types that implements/extends non-user-defined types from the
+			// Register types that implements/extends non-user-defined types from the
 			// name space.
+			new NonUserTypeRegisterVisitor().visit(fileAST, null);
 			
-			// Register all methods from the remaining user-defined types.
+			// Register all methods from the user-defined types.
+			MethodRegisterVisitor m = new MethodRegisterVisitor();
+					m.visit(fileAST, null);
 			
-			// Register all fields/variable from the user-defined types.
-			
-			// Rename all method and variables, provided that they are not
-			// invoked from a non-user-defined type.
-			
-			// Rename all user-defined types.
+			// Register all fields and variables from the user-defined types.
+			new VariableRegisterVisitor().visit(fileAST, null);
 			
 		}
-				
+		
+		for (String name : globalTypeList) {
+			globalNameMap.put(name, generateUniqueString());
+		}
+		resetStringGen();
+		for (String name : globalMethodList) {
+			globalNameMap.put(name, generateUniqueString());
+		}
+		resetStringGen();
+		for (String name : globalVariableList) {
+			globalNameMap.put(name, generateUniqueString());
+		}
+		resetStringGen();
+		
+		for (CompilationUnit fileAST : fileASTs) {
+			new NameChangeVisitor().visit(fileAST, null);
+			System.out.println(fileAST.toString());
+		}
+			
         for (int i = 0; i < fileASTs.size(); i++) {
         	programFiles.get(i).setFileContentAfter((fileASTs.get(i).toString()));
         }
@@ -105,7 +152,7 @@ public class LayoutObfuscator {
 	 * Recursively traverse all nodes in the AST and remove related 'comment nodes' from each.
 	 * @param nodes
 	 */
-	private static void recursiveRemoveComment(List<Node> nodes) {
+	private void recursiveRemoveComment(List<Node> nodes) {
 		if (nodes != null) {
 			for (Node n : nodes) {
 				n.setComment(null);
@@ -126,8 +173,13 @@ public class LayoutObfuscator {
 	 */
 	private String generateUniqueString() {	
 		String s = Integer.toString(stringGenID);
+		String s2 = "";
 		stringGenID++;
-		return "a" + s;
+		Random r = new Random();
+		for (int i = 0; i < 60; i++) {
+			s2 = s2 + r.nextInt(100);
+		}
+		return "$" + s2 + s;
 	}
 	
 	/**
@@ -137,59 +189,141 @@ public class LayoutObfuscator {
 		stringGenID = 0;
 	}
     
-    private class VariableRegisterVisitor extends VoidVisitorAdapter<Object> {
-    	    	
+    private class TypeRegisterVisitor extends VoidVisitorAdapter<Object> {
+    	
     	@Override 
-		public void visit(final VariableDeclaratorId v, Object arg) {
-    		super.visit(v, arg);
-			String variableName = v.getName();
-			if (!globalNameMap.containsKey(variableName)) {
-				String genString = generateUniqueString();
-				globalNameMap.put(variableName, genString);
+		public void visit(final ClassOrInterfaceDeclaration d, Object arg) {
+    		super.visit(d, arg);
+			String typeName = d.getName();
+			if (!globalTypeList.contains(typeName))
+				globalTypeList.add(typeName);
+		}  	
+    }
+    
+    private class NonUserTypeRegisterVisitor extends VoidVisitorAdapter<Object> {
+    	
+    	@Override 
+		public void visit(final ClassOrInterfaceDeclaration d, Object arg) {
+    		super.visit(d, arg);
+    		
+    		// Determines whether the type is user-defined. A type is user-defined
+    		// only if it does not implement or extend external types.
+    		boolean isUserDefined = true;
+			for (ClassOrInterfaceType t : d.getExtends()) {
+				if (!globalTypeList.contains(t.getName())) {
+					isUserDefined = false;
+				}
 			}
+			for (ClassOrInterfaceType t : d.getImplements()) {
+				if (!globalTypeList.contains(t.getName())) {
+					isUserDefined = false;
+				}
+			}
+			if (!isUserDefined) {
+				globalNonUserTypeList.add(d.getName());
+			}
+		}  	
+    }
+    
+    private class MethodRegisterVisitor extends VoidVisitorAdapter<Object> {
+    	
+    	@Override 
+		public void visit(final ClassOrInterfaceDeclaration d, Object arg) {
+    		super.visit(d, arg);
+    		if (!globalNonUserTypeList.contains(d.getName())) {
+				for (BodyDeclaration bd : d.getMembers()) {
+					if (bd instanceof MethodDeclaration) {
+						globalMethodList.add(((MethodDeclaration)bd).getName());
+					}
+				}
+    		} else {
+    			for (BodyDeclaration bd : d.getMembers()) {
+					if (bd instanceof MethodDeclaration) {
+						boolean isOverride = false;
+						for (AnnotationExpr a : bd.getAnnotations()) {
+							if (a.getName().getName().equals("Override")){
+								isOverride = true;
+							}
+						}
+						if (!isOverride)
+							globalMethodList.add(((MethodDeclaration)bd).getName());
+					}
+				}
+    		}
 		}
     	
-    	/*@Override 
-		public void visit(final MethodDeclaration m, Object arg) {
-    		super.visit(m, arg);
-			String methodName = m.getName();
-			System.out.println(m.getType());
-			if (!globalNameMap.containsKey(methodName)) {
-				String genString = generateUniqueString();
-				globalNameMap.put(methodName, genString);
+    }
+    
+    private class VariableRegisterVisitor extends VoidVisitorAdapter<Object> {
+    	
+    	@Override 
+		public void visit(final VariableDeclaratorId id, Object arg) {
+    		super.visit(id, arg);
+			if (!globalVariableList.contains(id.getName())) {
+				globalVariableList.add(id.getName());
 			}
-		}*/
+		}
     	
     }
     
     private class NameChangeVisitor extends VoidVisitorAdapter<Object> {
     	    	
     	@Override 
-    	public void visit(final NameExpr n, Object arg) {
-    		super.visit(n, arg);
-    		if (globalNameMap.containsKey(n.getName())) {
-				n.setName(globalNameMap.get(n.getName()));
-			} 
+    	public void visit(final MethodDeclaration d, Object arg) {
+    		super.visit(d, arg);
+    		if (globalNameMap.containsKey(d.getName())) {
+    			d.setName(globalNameMap.get(d.getName()));
+    		}
     	}
     	
     	@Override 
-		public void visit(final VariableDeclaratorId v, Object arg) {
-    		super.visit(v, arg);
-			if (globalNameMap.containsKey(v.getName())) {
-				v.setName(globalNameMap.get(v.getName()));
-			}
-		}
+    	public void visit(final MethodCallExpr d, Object arg) {
+    		super.visit(d, arg);
+    		if (globalNameMap.containsKey(d.getName())) {
+    			d.setName(globalNameMap.get(d.getName()));
+    		}
+    	}
     	
-    	/*@Override 
-		public void visit(final MethodCallExpr m, Object arg) {
-    		super.visit(m, arg);
-			String methodName = m.getName();
-			//System.out.println(methodName);
-			if (globalNameMap.containsKey(methodName)) {
-				m.setName(globalNameMap.get(methodName));
-
-			}
-		}*/
+    	@Override 
+    	public void visit(final NameExpr d, Object arg) {
+    		super.visit(d, arg);
+    		if (globalNameMap.containsKey(d.getName())) {
+    			d.setName(globalNameMap.get(d.getName()));
+    		}
+    	}
+    	
+    	@Override 
+    	public void visit(final VariableDeclaratorId d, Object arg) {
+    		super.visit(d, arg);
+    		if (globalNameMap.containsKey(d.getName())) {
+    			d.setName(globalNameMap.get(d.getName()));
+    		}
+    	}
+    	
+    	@Override 
+    	public void visit(final ClassOrInterfaceDeclaration d, Object arg) {
+    		super.visit(d, arg);
+    		if (globalNameMap.containsKey(d.getName())) {
+    			d.setName(globalNameMap.get(d.getName()));
+    		}
+    	}
+    	
+    	@Override 
+    	public void visit(final ClassOrInterfaceType d, Object arg) {
+    		super.visit(d, arg);
+    		if (globalNameMap.containsKey(d.getName())) {
+    			d.setName(globalNameMap.get(d.getName()));
+    		}
+    	}
+    	
+    	@Override 
+    	public void visit(final ConstructorDeclaration d, Object arg) {
+    		super.visit(d, arg);
+    		if (globalNameMap.containsKey(d.getName())) {
+    			d.setName(globalNameMap.get(d.getName()));
+    		}
+    	}
+    	
     }
     
 }
