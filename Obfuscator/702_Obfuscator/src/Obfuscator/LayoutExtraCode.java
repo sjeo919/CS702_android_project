@@ -10,7 +10,9 @@ import java.util.Random;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.ModifierSet;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
@@ -50,7 +52,9 @@ public class LayoutExtraCode {
 		
 		initializeCompilationUnit(fileContents);
 		
-		MethodDeclaration method = new MethodDeclaration();
+        //ASTHelper.addMember(cu.getTypes().get(0), method);
+		
+		
 		
 		changeMethods(false);
 		return cu.toString();
@@ -66,7 +70,14 @@ public class LayoutExtraCode {
             System.out.println(members);
             if(!randomDebug){
             	//members.add(generateRandomMethod());
-            	System.out.println(members.add(members.get(0)));
+
+                MethodDeclaration method = new MethodDeclaration(ModifierSet.PUBLIC, ASTHelper.VOID_TYPE, "random");
+//                method.setModifiers(ModifierSet.addModifier(method.getModifiers(), ModifierSet.STATIC));
+                addToMethod(method, null);
+               
+                MethodCallExpr call = randomLogStatement();
+        		method.getBody().getStmts().add(0, new ExpressionStmt(call));
+                members.add(method);
             }else{
             	for (BodyDeclaration member : members) {
                     if (member instanceof MethodDeclaration) {
@@ -163,4 +174,16 @@ public class LayoutExtraCode {
 	    }
 	    return new String(text);
 	}
+	
+	public void randomrandom(){
+		
+        ClassOrInterfaceDeclaration type = new ClassOrInterfaceDeclaration(ModifierSet.PUBLIC, false, "GeneratedClass");
+        ASTHelper.addTypeDeclaration(cu, type);
+
+        // create a method
+
+		
+		
+	}
+	
 }

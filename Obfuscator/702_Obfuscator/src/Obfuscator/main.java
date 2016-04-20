@@ -62,8 +62,8 @@ public class main {
 		LayoutCommentRemover layoutCommentRemover = new LayoutCommentRemover();
 		LayoutWhitespaceRemover layoutWhitespaceRemover = new LayoutWhitespaceRemover();
 		
-		System.out.println(layoutExtraCode.addDebugInformation(""));
-		//System.out.println(layoutExtraCode.addNewMethods(""));
+//		System.out.println(layoutExtraCode.addDebugInformation(""));
+		System.out.println(layoutExtraCode.addNewMethods(""));
 		
 		FileList2 = LayoutObfuscator.Obfuscate(FileList);
 		
