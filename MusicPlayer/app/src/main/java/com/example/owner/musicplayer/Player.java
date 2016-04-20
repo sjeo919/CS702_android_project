@@ -65,7 +65,7 @@ public class Player extends AppCompatActivity implements MediaPlayer.OnCompletio
         updateSeekBar = new Thread() {
             @Override
             public void run() {
-                int totalDuration = musicService.getDuration();
+                int totalDuration = musicService.getMusicDuration();
                 int currentPosition = 0;
                 sb.setMax(totalDuration);
 
@@ -89,29 +89,29 @@ public class Player extends AppCompatActivity implements MediaPlayer.OnCompletio
         sb.setOnSeekBarChangeListener(this);
     }
 
-
     public void init() {
         musicService.startPlayer();
         songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
         changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
-        sb.setMax(musicService.getDuration());
+        sb.setMax(musicService.getMusicDuration());
         updateSeekBar.start();
+    }
+
+    public void songCompleted() {
+        musicService.playNext();
+        changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        musicService.seekTo(seekBar.getProgress());
+        musicService.jumpTo(seekBar.getProgress());
     }
 
     @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-    }
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {    }
 
     @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-
-    }
+    public void onStartTrackingTouch(SeekBar seekBar) {    }
 
     public void changeAlbumArt (Uri uri) {
         albumArt.setImageBitmap(musicService.findAlbumArt(uri, null));
@@ -135,7 +135,6 @@ public class Player extends AppCompatActivity implements MediaPlayer.OnCompletio
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -150,29 +149,29 @@ public class Player extends AppCompatActivity implements MediaPlayer.OnCompletio
                 if (musicService.fastForward()) {
                     changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
                     songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+                    btPlay.setText("||");
                 }
                 break;
             case R.id.btRw:
                 if (musicService.rewind()) {
                     changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
                     songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+                    btPlay.setText("||");
                 }
                 break;
             case R.id.btNext:
                 musicService.playNext();
                 changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
                 songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
-//                sb.setProgress(0);
-                sb.setMax(musicService.getDuration());
-//                updateSeekBar.start();
+                sb.setMax(musicService.getMusicDuration());
+                btPlay.setText("||");
                 break;
             case R.id.btPrev:
                 musicService.playPrev();
                 changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
                 songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
-//                sb.setProgress(0);
-                sb.setMax(musicService.getDuration());
-//                updateSeekBar.start();
+                sb.setMax(musicService.getMusicDuration());
+                btPlay.setText("||");
                 break;
         }
     }

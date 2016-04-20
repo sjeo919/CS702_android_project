@@ -1,15 +1,9 @@
 package com.example.owner.musicplayer;
 
 import android.content.Intent;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,16 +11,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TabHost;
 import android.widget.Toast;
 import android.util.Log;
-
-import com.example.owner.musicplayer.Player;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         lv = (ListView) findViewById(R.id.allSongs);
-        bt_playlist = (Button) findViewById(R.id.btPlaylist);
+        bt_playlist = (Button) findViewById(R.id.btPlayer);
 
         bt_playlist.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,42 +66,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-//
-//    class MyTask extends AsyncTask<Void, String, String> {
-//
-//        ArrayAdapter<String> adapter;
-//
-//        @Override
-//        protected void onPreExecute() {
-//            adapter = (ArrayAdapter<String>) fav.getAdapter();
-//        }
-//
-//        @Override
-//        protected String doInBackground(Void... params) {
-//            int count = adapter.getCount();
-//            if (count < playList.size()) {
-//                publishProgress(playList.getLast().getName().toString());
-//            }
-//            return playList.getLast().getName().toString() + "is added to the queue";
-//        }
-//
-//        @Override
-//        protected void onProgressUpdate(String... values) {
-//            try {
-//                adapter.add(values[0]);
-//            } catch (UnsupportedOperationException e) {
-//                e.printStackTrace();
-//            }
-//            adapter.notifyDataSetChanged();
-//            fav.invalidateViews();
-//            fav.refreshDrawableState();
-//        }
-//
-//            @Override
-//        protected void onPostExecute(String s) {
-//                Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT).show();
-//        }
-//    }
 
     public ArrayList<File> findSongs(File root) {
         ArrayList<File> al = new ArrayList<File>();

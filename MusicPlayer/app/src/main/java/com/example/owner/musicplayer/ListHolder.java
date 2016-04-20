@@ -13,10 +13,6 @@ public class ListHolder {
         return holder.songList;
     }
 
-    public void setSongList(LinkedList<File> songList) {
-        holder.songList = songList;
-    }
-
     private static ListHolder holder = new ListHolder();
     public static ListHolder getInstance() {
         return holder;

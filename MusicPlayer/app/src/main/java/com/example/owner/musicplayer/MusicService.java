@@ -8,13 +8,15 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.List;
 
 import wseemann.media.FFmpegMediaMetadataRetriever;
 
-public class MusicService extends Service implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener {
+public class MusicService extends Service implements MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener {
 
     private MediaPlayer mp;
     private File curSong;
@@ -30,16 +32,9 @@ public class MusicService extends Service implements MediaPlayer.OnErrorListener
         mp = new MediaPlayer();
         PLAYLIST = (List) ListHolder.getInstance().getSongList();
         SONG_POS = 0;
+        mp.setOnCompletionListener(this);
         mp.setOnErrorListener(this);
         mp.setOnPreparedListener(this);
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        //Stop the mediaplayer
-        mp.stop();
-        mp.release();
-        return false;
     }
 
     public Uri getmSongUri (File song) {
@@ -111,10 +106,6 @@ public class MusicService extends Service implements MediaPlayer.OnErrorListener
         }
     }
 
-    public int getPosition() {
-        return SONG_POS;
-    }
-
     public File getCurSong() {
         return curSong;
     }
@@ -124,7 +115,7 @@ public class MusicService extends Service implements MediaPlayer.OnErrorListener
         return serviceBinder;
     }
 
-    public int getDuration() {
+    public int getMusicDuration() {
         return mp.getDuration();
     }
 
@@ -132,10 +123,21 @@ public class MusicService extends Service implements MediaPlayer.OnErrorListener
         return mp.getCurrentPosition();
     }
 
-    public void init() {
+    public void terminatePlayer() {
         if (mp != null) {
+            if (mp.isPlaying()) {
+                Toast.makeText(getApplicationContext(), "Stopping currently playing songs", Toast.LENGTH_SHORT).show();
+            }
             mp.stop();
             mp.release();
+        }
+    }
+
+    public void restartPlaylist() {
+        if (mp.isPlaying()) {
+            mp.stop();
+            mp.release();
+            SONG_POS = 0;
         }
     }
 
@@ -144,8 +146,16 @@ public class MusicService extends Service implements MediaPlayer.OnErrorListener
         mp.start();
     }
 
-    public void seekTo(int progress) {
+    public void jumpTo(int progress) {
         mp.seekTo(progress);
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        Log.i(TAG, "onCompletion method entered");
+        Player p = new Player();
+        p.songCompleted();
+        Log.i(TAG, "onCompletion method done");
     }
 
     @Override
@@ -154,13 +164,12 @@ public class MusicService extends Service implements MediaPlayer.OnErrorListener
     }
 
     @Override
-    public void onPrepared(MediaPlayer mp) {
-
-    }
+    public void onPrepared(MediaPlayer mp) {    }
 
     public class MyLocalBinder extends Binder {
         MusicService getService() {
             return MusicService.this;
         }
     }
+
 }
