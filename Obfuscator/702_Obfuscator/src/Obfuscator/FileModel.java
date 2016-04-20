@@ -7,6 +7,8 @@ public class FileModel {
 	private String fileContentAfter;
 	private Path filePath;
 	
+	public FileModel(){}
+	
 	public FileModel(String s1, String s2, Path p) {
 		this.fileContentBefore = s1;
 		this.fileContentAfter = s2;

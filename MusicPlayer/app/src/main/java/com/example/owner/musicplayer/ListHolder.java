@@ -12,7 +12,7 @@ public class ListHolder {
     public LinkedList<File> getSongList() {
         return holder.songList;
     }
-
+    
     private static ListHolder holder = new ListHolder();
     public static ListHolder getInstance() {
         return holder;
