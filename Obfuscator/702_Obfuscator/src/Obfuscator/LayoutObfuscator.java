@@ -324,4 +324,8 @@ public class LayoutObfuscator {
     	
     }
     
+    public Map<String, String> getGlobalTypeMap() {
+    	return globalTypeList;
+    }
+    
 }
