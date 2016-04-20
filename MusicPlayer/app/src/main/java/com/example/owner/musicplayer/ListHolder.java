@@ -10,11 +10,11 @@ public class ListHolder {
     }
 
     public LinkedList<File> getSongList() {
-        return holder.songList;
+        return songList;
     }
 
-    public void setSongList(LinkedList<File> songList) {
-        holder.songList = songList;
+    public void setSongList(LinkedList<File> sl) {
+        songList = sl;
     }
 
     private static ListHolder holder = new ListHolder();
