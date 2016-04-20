@@ -126,7 +126,7 @@ public class LayoutObfuscator {
 		
 		for (CompilationUnit fileAST : fileASTs) {
 			new NameChangeVisitor().visit(fileAST, null);
-			System.out.println(fileAST.toString());
+			//System.out.println(fileAST.toString());
 		}
 			
         for (int i = 0; i < fileASTs.size(); i++) {
