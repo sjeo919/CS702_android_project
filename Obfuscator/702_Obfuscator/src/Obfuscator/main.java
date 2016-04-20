@@ -39,7 +39,7 @@ public class main {
 		FileToStringConverter fc = new FileToStringConverter();
 		Files.walk(Paths.get(destDirPath)).forEach(filePath -> {
 		    if (Files.isRegularFile(filePath)) {
-				if (matcher.matches(filePath) && filePath.toString().contains("/src/main")) {
+				if (matcher.matches(filePath)&& filePath.toString().contains("\\src\\main")) {
 					try {
 						String s1 = fc.read(new File(filePath.toString()));
 						FileList.add(new FileModel(s1,"",filePath));
@@ -88,6 +88,7 @@ public class main {
 				PrintWriter writer = new PrintWriter(FileList2.get(i).getFilePath().toString());
 				writer.println(FileList2.get(i).getFileContentAfter());
 				writer.close();
+				FileNameChanger.changeName(FileList2.get(i).getFilePath(), layoutObfuscator.getGlobalTypeMap());
 			}
 		}
 	}
