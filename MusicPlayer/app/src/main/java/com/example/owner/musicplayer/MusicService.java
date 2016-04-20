@@ -8,7 +8,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
@@ -16,32 +15,47 @@ import java.util.List;
 
 import wseemann.media.FFmpegMediaMetadataRetriever;
 
-public class MusicService extends Service implements MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener {
+/**
+ * This Service class is responsible for dealing the media files in the background.
+ * The class does not directly interact with the UI components
+ * @author Andrew Jeong
+ */
+
+public class MusicService extends Service implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener {
 
     private MediaPlayer mp;
     private File curSong;
     private int SONG_POS;
     private List<File> PLAYLIST;
-    private static final String TAG = "LogMessage";
 
     private final IBinder serviceBinder = new MyLocalBinder();
 
     @Override
     public void onCreate() {
         super.onCreate();
+        // start a new MediaPlayer instance
         mp = new MediaPlayer();
+        // get the singleton instance of the playlist
         PLAYLIST = (List) ListHolder.getInstance().getSongList();
         SONG_POS = 0;
-        mp.setOnCompletionListener(this);
         mp.setOnErrorListener(this);
         mp.setOnPreparedListener(this);
     }
 
+    /**
+     * This method gets the media file as input and outputs the Uri of the file
+     * @param song
+     * @return Uri of the input media file
+     */
     public Uri getmSongUri (File song) {
         curSong = song;
         return Uri.parse(curSong.toString());
     }
 
+    /**
+     * Procedures to be taken when Play/Pause button is pressed and change the button text
+     * @return String of button text to be written on the button
+     */
     public String playButton() {
         if (mp.isPlaying()) {
             mp.pause();
@@ -52,6 +66,10 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         }
     }
 
+    /**
+     * fast forward on the current media file. Jump to the next file if the end is reached.
+     * @return true or false depending on whether the next media file is started or not
+     */
     public boolean fastForward() {
         if (mp.getCurrentPosition()+5000 < mp.getDuration()) {
             mp.seekTo(mp.getCurrentPosition() + 5000);
@@ -63,6 +81,10 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         }
     }
 
+    /**
+     * rewind on the current media file. Jump to the previous file if the end is reached.
+     * @return true or false depending on whether the next media file is started or not
+     */
     public boolean rewind() {
         if (mp.getCurrentPosition()-5000 > 0) {
             mp.seekTo(mp.getCurrentPosition() - 5000);
@@ -73,6 +95,10 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         }
     }
 
+    /**
+     * Primarily release the media player instance and find the position of the previous media file in the list.
+     * Make the MediaPlayer object to point to the new media file then start.
+     */
     public void playPrev() {
         mp.stop();
         mp.release();
@@ -82,6 +108,10 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         mp.start();
     }
 
+    /**
+     * Primarily release the media player instance and find the position of the next media file in the list.
+     * Make the MediaPlayer object to point to the new media file then start.
+     */
     public void playNext() {
         mp.stop();
         mp.release();
@@ -91,6 +121,12 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         mp.start();
     }
 
+    /**
+     * This method finds and returns the bitmap image that is embedded in the media file.
+     * @param uri of the media file
+     * @param data is always null
+     * @return Bitmap image to be used as the album art
+     */
     public Bitmap findAlbumArt (Uri uri, byte[] data) {
         FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
         retriever.setDataSource(uri.toString());
@@ -106,6 +142,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         }
     }
 
+    // Getter method for current song being played
     public File getCurSong() {
         return curSong;
     }
@@ -115,24 +152,34 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         return serviceBinder;
     }
 
+    // Getter method for the media duration
     public int getMusicDuration() {
         return mp.getDuration();
     }
 
+    // Getter method for current position in the media file
     public int getCurPosition() {
         return mp.getCurrentPosition();
     }
 
+    /**
+     * This method checks if the MediaPlayer is already playing, and if it is, toast a message then
+     * stop and release the media player object
+     */
     public void terminatePlayer() {
         if (mp != null) {
             if (mp.isPlaying()) {
-                Toast.makeText(getApplicationContext(), "Stopping currently playing songs", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "STOPPING CURRENTLY PLAYING SONGS", Toast.LENGTH_SHORT).show();
             }
             mp.stop();
             mp.release();
         }
     }
 
+    /**
+     * This method restarts the playlist when a media is already being played, and set the song
+     * position to 0
+     */
     public void restartPlaylist() {
         if (mp.isPlaying()) {
             mp.stop();
@@ -141,21 +188,17 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         }
     }
 
+    /**
+     * This method points the current media player object to a new playlist and start playing
+     */
     public void startPlayer() {
         mp = MediaPlayer.create(getApplicationContext(), getmSongUri(PLAYLIST.get(SONG_POS)));
         mp.start();
     }
 
+    // This method jumps to input position of the media file
     public void jumpTo(int progress) {
         mp.seekTo(progress);
-    }
-
-    @Override
-    public void onCompletion(MediaPlayer mp) {
-        Log.i(TAG, "onCompletion method entered");
-        Player p = new Player();
-        p.songCompleted();
-        Log.i(TAG, "onCompletion method done");
     }
 
     @Override
@@ -166,6 +209,9 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     @Override
     public void onPrepared(MediaPlayer mp) {    }
 
+    /**
+     * This declares MyLocalBinder that extends Binder class to implement Bound Service
+     */
     public class MyLocalBinder extends Binder {
         MusicService getService() {
             return MusicService.this;

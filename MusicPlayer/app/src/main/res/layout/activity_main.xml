@@ -16,7 +16,7 @@
         android:text="Playlist >>"
         android:id="@+id/btPlayer"
         style="?android:attr/borderlessButtonStyle"
-        android:textSize="20dp"
+        android:textSize="17dp"
         android:textColor="#ffffff"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"

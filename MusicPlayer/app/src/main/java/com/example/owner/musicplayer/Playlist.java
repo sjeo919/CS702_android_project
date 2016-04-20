@@ -19,16 +19,21 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.LinkedList;
 
+/**
+ * Playlist.java is reponsible for displaying the list items in the playlist. The user can either
+ * start playing the songs in the playlist or clear the current list.
+ * @author Andrew Jeong
+ */
 public class Playlist extends AppCompatActivity implements View.OnClickListener {
 
     boolean isBound = false;
-    MusicService musicService;
+    private MusicService musicService;
     private Runnable run;
     private LinkedList<File> playList;
     private ArrayAdapter<String> adp;
-    String[] items;
-    Button playButton, clearButton, playerButton;
-    ListView pl;
+    private String[] items;
+    private Button playButton, clearButton, playerButton;
+    private ListView pl;
     private static final String TAG = "LogMessage";
 
     @Override
@@ -36,14 +41,16 @@ public class Playlist extends AppCompatActivity implements View.OnClickListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist);
 
+        // Playlist class binds to the MusicService class
         Intent i = new Intent(this, MusicService.class);
         bindService(i, musicConnection, Context.BIND_AUTO_CREATE);
 
         playButton = (Button) findViewById(R.id.playButton);
         clearButton = (Button) findViewById(R.id.clearButton);
-//        playerButton = (Button) findViewById(R.id.btPlayer);
+
         pl = (ListView) findViewById(R.id.lvPlaylist);
 
+        // A runnable that refreshes the current activity
         run = new Runnable() {
             @Override
             public void run() {
@@ -57,16 +64,22 @@ public class Playlist extends AppCompatActivity implements View.OnClickListener 
 
         clearButton.setOnClickListener(this);
         playButton.setOnClickListener(this);
-//        playerButton.setOnClickListener(this);
 
+        // get the singleton instance of the playlist
         playList = ListHolder.getInstance().getSongList();
 
         items = extractNames(playList);
 
+        // instantiate array adapter for each list item in the ListView, and register it to the ListView
         adp = new ArrayAdapter<String>(getApplicationContext(), R.layout.song_layout, R.id.textView, items);
         pl.setAdapter(adp);
     }
 
+    /**
+     * This method extracts the file names without file extensions from the each file
+     * @param list of songs
+     * @return String array of the song names
+     */
     public String[] extractNames(LinkedList<File> list) {
         items = new String[list.size()];
         for (int i = 0; i < list.size(); i++) {
@@ -75,6 +88,9 @@ public class Playlist extends AppCompatActivity implements View.OnClickListener 
         return items;
     }
 
+    /**
+     * When Playlist activity is revisited from Player activity, run this method
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -104,37 +120,50 @@ public class Playlist extends AppCompatActivity implements View.OnClickListener 
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * This method runs the Runnable that was created in onCreate method and runs it on EDT
+     */
     public void refreshContent() {  runOnUiThread(run); }
 
+    /**
+     * This method reads which button was interacted with the user and carries out appropriate tasks.
+     * @param v
+     */
     @Override
     public void onClick(View v) {
         int id = v.getId();
         switch (id) {
             case R.id.playButton:
+                // start playing the playlist if it is not empty
                 if (playList.size() != 0) {
+                    // if media player is already running, terminate(release) it and start a new media player
                     musicService.restartPlaylist();
                     startActivity(new Intent(getApplicationContext(), Player.class).putExtra("pos", 0).putExtra("songlist", playList));
                 } else {
-                    Toast.makeText(getApplicationContext(), "No song in the playlist, Cannot start playing.", Toast.LENGTH_SHORT).show();
+                    // if the list is empty, toast a message
+                    Toast.makeText(getApplicationContext(), "NO SONG IN THE PLAYLIST, CANNOT START PLAYING.", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case R.id.clearButton:
+                // clear the play list
                 if (playList.size() != 0) {
+                    // if the play list is not empty, stop whatever is being played and clear the play list
+                    // then update the string array of song names and re-instantiate the adapter for the ListView
                     musicService.terminatePlayer();
                     playList.clear();
                     items = extractNames(playList);
                     adp = new ArrayAdapter<String>(getApplicationContext(), R.layout.song_layout, R.id.textView, items);
+                    // refresh the activity
                     refreshContent();
                 } else {
-                    Toast.makeText(getApplicationContext(), "The playlist is already empty", Toast.LENGTH_SHORT).show();
+                    // if the play list is already empty, toast a message
+                    Toast.makeText(getApplicationContext(), "THE PLAYLIST IS ALREADY EMPTY", Toast.LENGTH_SHORT).show();
                 }
                 break;
-//            case R.id.btPlayer:
-//                Intent i = new Intent(getApplicationContext(), Player.class);
-//                startActivityForResult(i, 0);
         }
     }
 
+    // Make a ServiceConnection instance that connects to the MusicService class
     private ServiceConnection musicConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {

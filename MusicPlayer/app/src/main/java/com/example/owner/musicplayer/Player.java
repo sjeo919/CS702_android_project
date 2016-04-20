@@ -22,20 +22,26 @@ import java.io.File;
 import java.util.ArrayList;
 import com.example.owner.musicplayer.MusicService.MyLocalBinder;
 
-public class Player extends AppCompatActivity implements MediaPlayer.OnCompletionListener, SeekBar.OnSeekBarChangeListener, View.OnClickListener {
+/**
+ * Player.java is responsible for the UI and the direct interactions that take place in
+ * Player activity (such as playback functions)
+ * @author Andrew Jeong
+ */
+
+public class Player extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
     private static final String TAG = "LogMessage";
-    ArrayList<File> mySongs;
-    int position;
-    Thread updateSeekBar;
+    private ArrayList<File> mySongs;
+    private int position;
+    private Thread updateSeekBar;
 
-    SeekBar sb;
-    Button btPlay, btFf, btRw, btNext, btPrev;
-    TextView songName;
-    ImageView albumArt;
+    private SeekBar sb;
+    private Button btPlay, btFf, btRw, btNext, btPrev;
+    private TextView songName;
+    private ImageView albumArt;
 
-    boolean isBound = false;
-    MusicService musicService;
+    private boolean isBound = false;
+    private MusicService musicService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +49,7 @@ public class Player extends AppCompatActivity implements MediaPlayer.OnCompletio
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
+        // Player class binds to the MusicService class
         Intent i = new Intent(this, MusicService.class);
         bindService(i, musicConnection, Context.BIND_AUTO_CREATE);
 
@@ -60,8 +67,10 @@ public class Player extends AppCompatActivity implements MediaPlayer.OnCompletio
         btPrev.setOnClickListener(this);
 
         albumArt = (ImageView) findViewById(R.id.albumView);
-
         sb = (SeekBar) findViewById(R.id.seekBar);
+        sb.setOnSeekBarChangeListener(this);
+
+        // a thread updates the seekbar while the media is being played
         updateSeekBar = new Thread() {
             @Override
             public void run() {
@@ -82,24 +91,24 @@ public class Player extends AppCompatActivity implements MediaPlayer.OnCompletio
             }
         };
 
+        // retrieve the bundle that was sent from Playlist class
         Intent in = getIntent();
         Bundle b = in.getExtras();
         mySongs = (ArrayList) b.getParcelableArrayList("songlist");
         position = b.getInt("pos", 0);
-        sb.setOnSeekBarChangeListener(this);
     }
 
+    /**
+     * initialises the player. Gets the mediaplayer ready to run and loads the name and the album
+     * art of the media file.
+     */
     public void init() {
         musicService.startPlayer();
         songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
         changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
         sb.setMax(musicService.getMusicDuration());
+        // thread starts running to update the seekbar
         updateSeekBar.start();
-    }
-
-    public void songCompleted() {
-        musicService.playNext();
-        changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
     }
 
     @Override
@@ -113,6 +122,10 @@ public class Player extends AppCompatActivity implements MediaPlayer.OnCompletio
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {    }
 
+    /**
+     * sets the ImageView to show the album art embedded in the media file
+     * @param uri
+     */
     public void changeAlbumArt (Uri uri) {
         albumArt.setImageBitmap(musicService.findAlbumArt(uri, null));
     }
@@ -138,38 +151,57 @@ public class Player extends AppCompatActivity implements MediaPlayer.OnCompletio
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * This method reads which button was interacted with the user and carries out appropriate tasks.
+      * @param v
+     */
     @Override
     public void onClick(View v) {
         int id = v.getId();
         switch (id) {
             case R.id.btPlay:
+                // clicking play button either plays or pauses the media and changes the button text
                 btPlay.setText(musicService.playButton());
                 break;
             case R.id.btFf:
+                // fast forward the currently playing media by 500ms
                 if (musicService.fastForward()) {
+                    // when fast forwarded at the end of the file, jump to the next media file in the playlist
+                    // and change the album art.
                     changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
                     songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+                    sb.setMax(musicService.getMusicDuration());
+                    // in case the media was paused then fast forwarded, change button text when the next media starts
                     btPlay.setText("||");
                 }
                 break;
             case R.id.btRw:
+                // rewind the currently playing media by 500ms
                 if (musicService.rewind()) {
+                    // when rewound at the start of the file, jump to the next media file in the playlist
+                    // and change the album art and the song name.
                     changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
                     songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+                    sb.setMax(musicService.getMusicDuration());
+                    // in case the media was paused then rewound, change button text when the next media starts
                     btPlay.setText("||");
                 }
                 break;
             case R.id.btNext:
+                // play the next media file then change the album art and the song name
                 musicService.playNext();
                 changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
                 songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+                // reset the seekbar max value then change the button text
                 sb.setMax(musicService.getMusicDuration());
                 btPlay.setText("||");
                 break;
             case R.id.btPrev:
+                // play the previous media file then change the album art and the song name.
                 musicService.playPrev();
                 changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
                 songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+                // reset the seekbar max value then change the button text
                 sb.setMax(musicService.getMusicDuration());
                 btPlay.setText("||");
                 break;
@@ -190,9 +222,4 @@ public class Player extends AppCompatActivity implements MediaPlayer.OnCompletio
             isBound = false;
         }
     };
-
-    @Override
-    public void onCompletion(MediaPlayer mp) {
-        Log.i(TAG, "OnCompletion method entered!");
-    }
 }

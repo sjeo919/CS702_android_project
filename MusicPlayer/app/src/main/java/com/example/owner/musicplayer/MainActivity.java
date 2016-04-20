@@ -18,6 +18,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+/**
+ * MainActivity.java iterates through the directory tree of the device and lists all the mp3 and wav
+ * files on the ListView. Songs can be added to the play list by clicking on them
+ * @author Andrew Jeong
+ */
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "LogMessage";
@@ -38,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         lv = (ListView) findViewById(R.id.allSongs);
         bt_playlist = (Button) findViewById(R.id.btPlayer);
 
+        // When Playlist>> button is pressed, open the Playlist activity
         bt_playlist.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -46,32 +52,42 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // get the instance of the play list
         playList = ListHolder.getInstance().getSongList();
+        // find all the mp3 and wav media files on the device
         final ArrayList<File> mySongs = findSongs(Environment.getExternalStorageDirectory());
+        // extract song names from the file names
         items = new String[mySongs.size()];
         for (int i = 0; i < mySongs.size(); i++) {
             items[i] = mySongs.get(i).getName().toString().replace(".mp3", "").replace(".wav", "");
         }
 
-
+        // instantiate array adapter for each list item in the ListView, and register it to the ListView
         adp = new ArrayAdapter<String>(getApplicationContext(), R.layout.song_layout, R.id.textView, items);
         lv.setAdapter(adp);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // for each clicked list item, add the item to the end of the play list
                 File selectedItem = mySongs.get(position);
                 playList.addLast(selectedItem);
                 Log.i(TAG, "The size of the list is: " + playList.size());
-                Toast.makeText(getApplicationContext(), items[position] + " is added to the queue", Toast.LENGTH_SHORT).show();
+                // toast a message to indicate that the song was added successfully
+                Toast.makeText(getApplicationContext(), items[position] + " IS ADDED TO THE QUEUE", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    /**
+     * This method iterates through the directory tree on the device to find all the files that
+     * ends with .mp3 or .wav
+     * @param root directory of the device
+     * @return ArrayList<File> of all the songs found
+     */
     public ArrayList<File> findSongs(File root) {
         ArrayList<File> al = new ArrayList<File>();
         File[] files = root.listFiles();
         if(files != null){
-
             for (File singleFile : files) {
                 if (singleFile.isDirectory() && !singleFile.isHidden()) {
                     al.addAll(findSongs(singleFile));
@@ -106,5 +122,4 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
 }
