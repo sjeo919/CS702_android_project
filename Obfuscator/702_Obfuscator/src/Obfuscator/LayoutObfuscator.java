@@ -139,7 +139,7 @@ public class LayoutObfuscator {
 		
 		for (CompilationUnit fileAST : fileASTs) {
 			new NameChangeVisitor().visit(fileAST, null);
-			System.out.println(fileAST.toString());
+			//System.out.println(fileAST.toString());
 		}
 			
         for (int i = 0; i < fileASTs.size(); i++) {
@@ -176,7 +176,7 @@ public class LayoutObfuscator {
 		String s2 = "";
 		stringGenID++;
 		Random r = new Random();
-		for (int i = 0; i < 60; i++) {
+		for (int i = 0; i < 5; i++) {
 			s2 = s2 + r.nextInt(100);
 		}
 		return "$" + s2 + s;
