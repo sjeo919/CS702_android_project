@@ -65,20 +65,18 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 public class LayoutObfuscator {
 	
 	private List<CompilationUnit> fileASTs;
-	private List<String> globalTypeList;
+	private Map<String, String> globalTypeList;
 	private List<String> globalNonUserTypeList;
-	private List<String> globalMethodList;
-	private List<String> globalVariableList;
-	private Map<String, String> globalNameMap;
+	private Map<String, String> globalMethodList;
+	private Map<String, String> globalVariableList;
 	private int stringGenID = 0;
 	
 	public LayoutObfuscator() {
 		fileASTs = new ArrayList<CompilationUnit>();
-		globalTypeList = new ArrayList<String>();
+		globalTypeList = new HashMap<String, String>();
 		globalNonUserTypeList = new ArrayList<String>();
-		globalMethodList = new ArrayList<String>();
-		globalVariableList = new ArrayList<String>();
-		globalNameMap = new HashMap<String, String>();
+		globalMethodList = new HashMap<String, String>();
+		globalVariableList = new HashMap<String, String>();
 		stringGenID = 0;
 	}
 
@@ -101,6 +99,8 @@ public class LayoutObfuscator {
 			new TypeRegisterVisitor().visit(fileAST, null);
 		
 		}
+		
+		resetStringGen();
         
 		for (CompilationUnit fileAST : fileASTs) {
 			
@@ -124,7 +124,7 @@ public class LayoutObfuscator {
 			
 		}
 		
-		for (String name : globalTypeList) {
+		/*for (String name : globalTypeList) {
 			globalNameMap.put(name, generateUniqueString());
 		}
 		resetStringGen();
@@ -135,11 +135,11 @@ public class LayoutObfuscator {
 		for (String name : globalVariableList) {
 			globalNameMap.put(name, generateUniqueString());
 		}
-		resetStringGen();
+		resetStringGen();*/
 		
 		for (CompilationUnit fileAST : fileASTs) {
 			new NameChangeVisitor().visit(fileAST, null);
-			//System.out.println(fileAST.toString());
+			System.out.println(fileAST.toString());
 		}
 			
         for (int i = 0; i < fileASTs.size(); i++) {
@@ -195,8 +195,8 @@ public class LayoutObfuscator {
 		public void visit(final ClassOrInterfaceDeclaration d, Object arg) {
     		super.visit(d, arg);
 			String typeName = d.getName();
-			if (!globalTypeList.contains(typeName))
-				globalTypeList.add(typeName);
+			if (!globalTypeList.containsKey(typeName))
+				globalTypeList.put(typeName, generateUniqueString());
 		}  	
     }
     
@@ -210,12 +210,12 @@ public class LayoutObfuscator {
     		// only if it does not implement or extend external types.
     		boolean isUserDefined = true;
 			for (ClassOrInterfaceType t : d.getExtends()) {
-				if (!globalTypeList.contains(t.getName())) {
+				if (!globalTypeList.containsKey(t.getName())) {
 					isUserDefined = false;
 				}
 			}
 			for (ClassOrInterfaceType t : d.getImplements()) {
-				if (!globalTypeList.contains(t.getName())) {
+				if (!globalTypeList.containsKey(t.getName())) {
 					isUserDefined = false;
 				}
 			}
@@ -233,7 +233,7 @@ public class LayoutObfuscator {
     		if (!globalNonUserTypeList.contains(d.getName())) {
 				for (BodyDeclaration bd : d.getMembers()) {
 					if (bd instanceof MethodDeclaration) {
-						globalMethodList.add(((MethodDeclaration)bd).getName());
+						globalMethodList.put(((MethodDeclaration)bd).getName(), generateUniqueString());
 					}
 				}
     		} else {
@@ -246,7 +246,7 @@ public class LayoutObfuscator {
 							}
 						}
 						if (!isOverride)
-							globalMethodList.add(((MethodDeclaration)bd).getName());
+							globalMethodList.put(((MethodDeclaration)bd).getName(), generateUniqueString());
 					}
 				}
     		}
@@ -259,8 +259,8 @@ public class LayoutObfuscator {
     	@Override 
 		public void visit(final VariableDeclaratorId id, Object arg) {
     		super.visit(id, arg);
-			if (!globalVariableList.contains(id.getName())) {
-				globalVariableList.add(id.getName());
+			if (!globalVariableList.containsKey(id.getName())) {
+				globalVariableList.put(id.getName(), generateUniqueString());
 			}
 		}
     	
@@ -271,56 +271,56 @@ public class LayoutObfuscator {
     	@Override 
     	public void visit(final MethodDeclaration d, Object arg) {
     		super.visit(d, arg);
-    		if (globalNameMap.containsKey(d.getName())) {
-    			d.setName(globalNameMap.get(d.getName()));
+    		if (globalMethodList.containsKey(d.getName())) {
+    			d.setName(globalMethodList.get(d.getName()));
     		}
     	}
     	
     	@Override 
     	public void visit(final MethodCallExpr d, Object arg) {
     		super.visit(d, arg);
-    		if (globalNameMap.containsKey(d.getName())) {
-    			d.setName(globalNameMap.get(d.getName()));
+    		if (globalMethodList.containsKey(d.getName())) {
+    			d.setName(globalMethodList.get(d.getName()));
     		}
     	}
     	
     	@Override 
     	public void visit(final NameExpr d, Object arg) {
     		super.visit(d, arg);
-    		if (globalNameMap.containsKey(d.getName())) {
-    			d.setName(globalNameMap.get(d.getName()));
+    		if (globalVariableList.containsKey(d.getName())) {
+    			d.setName(globalVariableList.get(d.getName()));
     		}
     	}
     	
     	@Override 
     	public void visit(final VariableDeclaratorId d, Object arg) {
     		super.visit(d, arg);
-    		if (globalNameMap.containsKey(d.getName())) {
-    			d.setName(globalNameMap.get(d.getName()));
+    		if (globalVariableList.containsKey(d.getName())) {
+    			d.setName(globalVariableList.get(d.getName()));
     		}
     	}
     	
     	@Override 
     	public void visit(final ClassOrInterfaceDeclaration d, Object arg) {
     		super.visit(d, arg);
-    		if (globalNameMap.containsKey(d.getName())) {
-    			d.setName(globalNameMap.get(d.getName()));
+    		if (globalTypeList.containsKey(d.getName())) {
+    			d.setName(globalTypeList.get(d.getName()));
     		}
     	}
     	
     	@Override 
     	public void visit(final ClassOrInterfaceType d, Object arg) {
     		super.visit(d, arg);
-    		if (globalNameMap.containsKey(d.getName())) {
-    			d.setName(globalNameMap.get(d.getName()));
+    		if (globalTypeList.containsKey(d.getName())) {
+    			d.setName(globalTypeList.get(d.getName()));
     		}
     	}
     	
     	@Override 
     	public void visit(final ConstructorDeclaration d, Object arg) {
     		super.visit(d, arg);
-    		if (globalNameMap.containsKey(d.getName())) {
-    			d.setName(globalNameMap.get(d.getName()));
+    		if (globalTypeList.containsKey(d.getName())) {
+    			d.setName(globalTypeList.get(d.getName()));
     		}
     	}
     	
