@@ -67,12 +67,11 @@ public class LayoutExtraCode {
 
         for (TypeDeclaration type : types) {
             List<BodyDeclaration> members = type.getMembers();
-            System.out.println(members);
+//            System.out.println(members);
             if(!randomDebug){
             	//members.add(generateRandomMethod());
 
                 MethodDeclaration method = new MethodDeclaration(ModifierSet.PUBLIC, ASTHelper.VOID_TYPE, "random");
-//                method.setModifiers(ModifierSet.addModifier(method.getModifiers(), ModifierSet.STATIC));
                 addToMethod(method, null);
                
                 MethodCallExpr call = randomLogStatement();
@@ -103,7 +102,6 @@ public class LayoutExtraCode {
 			body.setStmts(new ArrayList<Statement>());
 		}
 		
-		
         for(int i = 0; i < body.getStmts().size(); i++){
         	if(random.nextInt(10) > 4){
         		MethodCallExpr call = randomLogStatement();
@@ -127,20 +125,18 @@ public class LayoutExtraCode {
 	
 
 	private void initializeCompilationUnit(String fileContents){
-		InputStream in = null;
-		//InputStream in = new ByteArrayInputStream(fileContents.getBytes());
-				
-		try {
-			in = new FileInputStream("./src/Obfuscator/TestClass.java");
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+//		InputStream in = null;
+		InputStream in = new ByteArrayInputStream(fileContents.getBytes());		
+//		try {
+//			in = new FileInputStream("./src/Obfuscator/TestClass.java");
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		}
 		try {
 			cu = JavaParser.parse(in);
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	private MethodDeclaration generateRandomMethod(){
@@ -148,8 +144,7 @@ public class LayoutExtraCode {
 		MethodDeclaration method = new MethodDeclaration();
 		//add parameters to the method
 		ASTHelper.addParameter(method, new Parameter());
-		
-		
+				
 		BlockStmt body = method.getBody();
         
 		if (body==null) {
@@ -159,8 +154,7 @@ public class LayoutExtraCode {
 		if (body.getStmts()==null) {
 			body.setStmts(new ArrayList<Statement>());
 		}
-		
-		
+
 		return method;
 	}
 	
@@ -173,17 +167,5 @@ public class LayoutExtraCode {
 	        text[i] = characters.charAt(random.nextInt(characters.length()));
 	    }
 	    return new String(text);
-	}
-	
-	public void randomrandom(){
-		
-        ClassOrInterfaceDeclaration type = new ClassOrInterfaceDeclaration(ModifierSet.PUBLIC, false, "GeneratedClass");
-        ASTHelper.addTypeDeclaration(cu, type);
-
-        // create a method
-
-		
-		
-	}
-	
+	}	
 }

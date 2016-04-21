@@ -5,24 +5,55 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.example.owner.musicplayer.Player">
+    tools:context="com.example.owner.musicplayer.Player"
+    android:background="#2897ff">
+
+    <ImageView
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        android:id="@+id/albumView"
+        android:layout_below="@+id/songName"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <SeekBar
-        android:layout_width="fill_parent"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:id="@+id/seekBar"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="35dp"
-        android:indeterminate="false" />
+        android:layout_below="@+id/albumView"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="50dp"
         android:layout_height="wrap_content"
         android:text="||"
         android:id="@+id/btPlay"
-        android:layout_below="@+id/seekBar"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignTop="@+id/btRw"
+        android:layout_centerHorizontal="true"
+        android:background="#00539f"
+        android:textColor="#ffffff" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:text=">>"
+        android:id="@+id/btFf"
+        android:layout_alignTop="@+id/btPlay"
+        android:layout_toRightOf="@+id/btPlay"
+        android:layout_toEndOf="@+id/btPlay"
+        android:background="#00539f"
+        android:textColor="#ffffff" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:text=">|"
+        android:id="@+id/btNext"
+        android:layout_alignTop="@+id/btFf"
+        android:layout_toRightOf="@+id/btFf"
+        android:layout_toEndOf="@+id/btFf"
+        android:background="#00539f"
+        android:textColor="#ffffff" />
 
     <Button
         android:layout_width="50dp"
@@ -31,33 +62,35 @@
         android:id="@+id/btRw"
         android:layout_below="@+id/seekBar"
         android:layout_toLeftOf="@+id/btPlay"
-        android:layout_toStartOf="@+id/btPlay" />
-
-    <Button
-        android:layout_width="50dp"
-        android:layout_height="wrap_content"
-        android:text=">>"
-        android:id="@+id/btFf"
-        android:layout_alignBottom="@+id/btPlay"
-        android:layout_toRightOf="@+id/btPlay"
-        android:layout_toEndOf="@+id/btPlay" />
+        android:layout_toStartOf="@+id/btPlay"
+        android:background="#00539f"
+        android:textColor="#ffffff" />
 
     <Button
         android:layout_width="50dp"
         android:layout_height="wrap_content"
         android:text="|&lt;"
         android:id="@+id/btPrev"
-        android:layout_below="@+id/seekBar"
+        android:layout_alignBaseline="@+id/btRw"
+        android:layout_alignBottom="@+id/btRw"
         android:layout_toLeftOf="@+id/btRw"
-        android:layout_toStartOf="@+id/btRw" />
+        android:layout_toStartOf="@+id/btRw"
+        android:background="#00539f"
+        android:textColor="#ffffff" />
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="50dp"
+    <TextView
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text=">|"
-        android:id="@+id/btNext"
-        android:layout_alignBottom="@+id/btFf"
-        android:layout_toRightOf="@+id/btFf"
-        android:layout_toEndOf="@+id/btFf" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Large Text"
+        android:id="@+id/songName"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:textSize="25dp"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:singleLine="true"
+        android:textColor="#ffffff" />
+
 </RelativeLayout>

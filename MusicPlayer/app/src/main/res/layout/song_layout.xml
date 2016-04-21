@@ -10,5 +10,6 @@
         android:text="Large Text"
         android:id="@+id/textView"
         android:padding="10dp"
+        android:singleLine="true"
         android:textColor="#ff000000" />
 </LinearLayout>
