@@ -1,21 +1,17 @@
 package Obfuscator;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.ModifierSet;
-import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
@@ -43,39 +39,44 @@ public class LayoutExtraCode {
 		changeMethods(true);
 
 		return cu.toString();
-	}
-	
-	
-	
-	
+	}	
 	public String addNewMethods(String fileContents){
 		
 		initializeCompilationUnit(fileContents);
-		
+		System.out.println("addnewmethod");
         //ASTHelper.addMember(cu.getTypes().get(0), method);
-		
-		
 		
 		changeMethods(false);
 		return cu.toString();
 	}
 	
-	
-    private void changeMethods(boolean randomDebug) {
-    	
-        List<TypeDeclaration> types = cu.getTypes();
+	public String shuffleMethods(String fileContents){
+
+		System.out.println("??");
+		initializeCompilationUnit(fileContents);
+    	List<TypeDeclaration> types = cu.getTypes();
 
         for (TypeDeclaration type : types) {
             List<BodyDeclaration> members = type.getMembers();
-//            System.out.println(members);
-            if(!randomDebug){
-            	//members.add(generateRandomMethod());
+            System.out.println(members);
+            Collections.shuffle(members);
+            System.out.println(members);
+        }	
+			
+		
+		return cu.toString();
+	}
+	
+	
+	
+	
+    private void changeMethods(boolean randomDebug) {
+    	List<TypeDeclaration> types = cu.getTypes();
 
-                MethodDeclaration method = new MethodDeclaration(ModifierSet.PUBLIC, ASTHelper.VOID_TYPE, "random");
-                addToMethod(method, null);
-               
-                MethodCallExpr call = randomLogStatement();
-        		method.getBody().getStmts().add(0, new ExpressionStmt(call));
+        for (TypeDeclaration type : types) {
+            List<BodyDeclaration> members = type.getMembers();
+            if(!randomDebug){
+                MethodDeclaration method = randomMethod();
                 members.add(method);
             }else{
             	for (BodyDeclaration member : members) {
@@ -85,7 +86,6 @@ public class LayoutExtraCode {
                     }
                 }
             }
-            
         }
     }
 
@@ -125,13 +125,7 @@ public class LayoutExtraCode {
 	
 
 	private void initializeCompilationUnit(String fileContents){
-//		InputStream in = null;
-		InputStream in = new ByteArrayInputStream(fileContents.getBytes());		
-//		try {
-//			in = new FileInputStream("./src/Obfuscator/TestClass.java");
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		}
+		InputStream in = new ByteArrayInputStream(fileContents.getBytes());
 		try {
 			cu = JavaParser.parse(in);
 		} catch (ParseException e) {
@@ -139,11 +133,9 @@ public class LayoutExtraCode {
 		}
 	}
 	
-	private MethodDeclaration generateRandomMethod(){
-		//initialize a method
-		MethodDeclaration method = new MethodDeclaration();
-		//add parameters to the method
-		ASTHelper.addParameter(method, new Parameter());
+	private MethodDeclaration randomMethod(){
+		
+		MethodDeclaration method = new MethodDeclaration(ModifierSet.PUBLIC, ASTHelper.VOID_TYPE, generateRandomString());
 				
 		BlockStmt body = method.getBody();
         
@@ -153,8 +145,12 @@ public class LayoutExtraCode {
 		}
 		if (body.getStmts()==null) {
 			body.setStmts(new ArrayList<Statement>());
-		}
-
+		}		
+        addToMethod(method, null);
+       
+        MethodCallExpr call = randomLogStatement();
+		method.getBody().getStmts().add(0, new ExpressionStmt(call));		
+		
 		return method;
 	}
 	

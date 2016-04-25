@@ -16,10 +16,8 @@ public class FileNameChanger {
 				
 		File file2 = new File(newName);
 
-		if (file2.exists())
-		   throw new java.io.IOException("file exists");
-
-		file.renameTo(file2);
+		if (!file2.exists())
+			file.renameTo(file2);
 	}
 
 }

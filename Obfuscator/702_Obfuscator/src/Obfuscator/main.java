@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -15,7 +14,7 @@ import org.apache.commons.io.FileUtils;
 
 import com.github.javaparser.ParseException;
 
-public class main {
+public class Main {
 
 	public static void main(String[] args) throws IOException, ParseException {
 		// TODO Auto-generated method stub
@@ -77,8 +76,10 @@ public class main {
 			output = FileList2.get(i).getFileContentAfter();
 			
 			//comment out lines below depending on which obfuscations you'd like to run (note. whitespaceRemover requires commentRemover to be run prior)
-//			output = extraDebugInformation.insertDebugStatement(output);
+			
+			output = layoutExtraCode.addNewMethods(output);
 			output = layoutExtraCode.addDebugInformation(output);
+			output = layoutExtraCode.shuffleMethods(output);
 			output = layoutWhitespaceRemover.removeWhitespace(output);
 			
 			FileList2.get(i).setFileContentAfter(output);
