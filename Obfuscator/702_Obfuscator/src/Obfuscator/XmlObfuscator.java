@@ -1,7 +1,5 @@
 package Obfuscator;
 
-import java.nio.file.Path;
-import java.util.Iterator;
 import java.util.Map;
 
 public class XmlObfuscator {

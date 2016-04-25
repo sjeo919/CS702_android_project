@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -15,13 +14,15 @@ import org.apache.commons.io.FileUtils;
 
 import com.github.javaparser.ParseException;
 
-public class main {
+public class Main {
 
 	public static void main(String[] args) throws IOException, ParseException {
 		// TODO Auto-generated method stub
 		
 		String destDirPath = System.getProperty("user.home") + "/702_Obfuscator/MusicPlayer_ob";
-		String srcDirPath = System.getProperty("user.home") + "/702_Obfuscator/MusicPlayer";
+//		String srcDirPath = System.getProperty("user.home") + "/702_Obfuscator/MusicPlayer";
+		String srcDirPath = "D:\\Workspace\\702_project\\MusicPlayer";
+		
 //		File srcDir = new File(args[0]);
 //		File destDir = new File(args[1]);
 		File srcDir = new File(srcDirPath);
@@ -63,8 +64,8 @@ public class main {
 		//instantiate obfuscator classes.
 		LayoutObfuscator layoutObfuscator = new LayoutObfuscator();
 		XmlObfuscator xmlObfuscator = new XmlObfuscator();
-		ExtraDebugInformation extraDebugInformation = new ExtraDebugInformation();
-		//LayoutWhitespaceRemover layoutWhitespaceRemover = new LayoutWhitespaceRemover();
+		LayoutExtraCode layoutExtraCode = new LayoutExtraCode();
+		LayoutWhitespaceRemover layoutWhitespaceRemover = new LayoutWhitespaceRemover();
 		
 		FileList2 = layoutObfuscator.Obfuscate(FileList);
 		xmlFile2 = xmlObfuscator.obfuscate(layoutObfuscator.getGlobalTypeMap(), xmlFile);
@@ -75,8 +76,11 @@ public class main {
 			output = FileList2.get(i).getFileContentAfter();
 			
 			//comment out lines below depending on which obfuscations you'd like to run (note. whitespaceRemover requires commentRemover to be run prior)
-			output = extraDebugInformation.insertDebugStatement(output);
-			//output = layoutWhitespaceRemover.removeWhitespace(output);
+			
+			output = layoutExtraCode.addNewMethods(output);
+			output = layoutExtraCode.addDebugInformation(output);
+			output = layoutExtraCode.shuffleMethods(output);
+			output = layoutWhitespaceRemover.removeWhitespace(output);
 			
 			FileList2.get(i).setFileContentAfter(output);
 		}
