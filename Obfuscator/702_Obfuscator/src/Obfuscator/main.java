@@ -19,14 +19,12 @@ public class Main {
 	public static void main(String[] args) throws IOException, ParseException {
 		// TODO Auto-generated method stub
 		
-		String destDirPath = System.getProperty("user.home") + "/702_Obfuscator/MusicPlayer_ob";
-//		String srcDirPath = System.getProperty("user.home") + "/702_Obfuscator/MusicPlayer";
-		String srcDirPath = "D:\\Workspace\\702_project\\MusicPlayer";
+		String srcDirPath = args[0];
+		String destDirPath = args[1];
 		
-//		File srcDir = new File(args[0]);
-//		File destDir = new File(args[1]);
 		File srcDir = new File(srcDirPath);
 		File destDir = new File(destDirPath);
+
 		FileUtils.deleteDirectory(destDir); //delete dest(output) directory incase it already exists.
 		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**.java");
 		PathMatcher matcher2 = FileSystems.getDefault().getPathMatcher("glob:**AndroidManifest.xml*");
@@ -40,7 +38,7 @@ public class Main {
 		FileToStringConverter fc = new FileToStringConverter();
 		Files.walk(Paths.get(destDirPath)).forEach(filePath -> {
 		    if (Files.isRegularFile(filePath)) {
-				if (matcher.matches(filePath)&& filePath.toString().contains("\\src\\main")) {
+				if (matcher.matches(filePath)&& filePath.toString().contains("/src/main")) {
 					try {
 						String s1 = fc.read(new File(filePath.toString()));
 						FileList.add(new FileModel(s1,"",filePath));
