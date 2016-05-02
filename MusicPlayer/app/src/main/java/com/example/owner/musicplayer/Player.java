@@ -104,7 +104,7 @@ public class Player extends AppCompatActivity implements SeekBar.OnSeekBarChange
      */
     public void init() {
         musicService.startPlayer();
-        songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+        songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", "").replace(".mpga","").replace(".aac",""));
         changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
         sb.setMax(musicService.getMusicDuration());
         // thread starts running to update the seekbar
@@ -169,7 +169,7 @@ public class Player extends AppCompatActivity implements SeekBar.OnSeekBarChange
                     // when fast forwarded at the end of the file, jump to the next media file in the playlist
                     // and change the album art.
                     changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
-                    songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+                    songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", "").replace(".mpga","").replace(".aac",""));
                     sb.setMax(musicService.getMusicDuration());
                     // in case the media was paused then fast forwarded, change button text when the next media starts
                     btPlay.setText("||");
@@ -181,7 +181,7 @@ public class Player extends AppCompatActivity implements SeekBar.OnSeekBarChange
                     // when rewound at the start of the file, jump to the next media file in the playlist
                     // and change the album art and the song name.
                     changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
-                    songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+                    songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", "").replace(".mpga","").replace(".aac",""));
                     sb.setMax(musicService.getMusicDuration());
                     // in case the media was paused then rewound, change button text when the next media starts
                     btPlay.setText("||");
@@ -191,7 +191,7 @@ public class Player extends AppCompatActivity implements SeekBar.OnSeekBarChange
                 // play the next media file then change the album art and the song name
                 musicService.playNext();
                 changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
-                songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+                songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", "").replace(".mpga","").replace(".aac",""));
                 // reset the seekbar max value then change the button text
                 sb.setMax(musicService.getMusicDuration());
                 btPlay.setText("||");
@@ -200,7 +200,7 @@ public class Player extends AppCompatActivity implements SeekBar.OnSeekBarChange
                 // play the previous media file then change the album art and the song name.
                 musicService.playPrev();
                 changeAlbumArt(musicService.getmSongUri(musicService.getCurSong()));
-                songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", ""));
+                songName.setText(musicService.getCurSong().getName().replace(".mp3", "").replace(".wav", "").replace(".mpga","").replace(".aac",""));
                 // reset the seekbar max value then change the button text
                 sb.setMax(musicService.getMusicDuration());
                 btPlay.setText("||");

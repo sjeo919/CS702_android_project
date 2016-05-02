@@ -1,8 +1,11 @@
 package com.example.owner.musicplayer;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Menu;
@@ -15,6 +18,7 @@ import android.widget.Toast;
 import android.util.Log;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -30,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private Button bt_playlist;
     private LinkedList<File> playList;
     private ArrayAdapter<String> adp;
+    private String[] STAR = {"*"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,11 +60,13 @@ public class MainActivity extends AppCompatActivity {
         // get the instance of the play list
         playList = ListHolder.getInstance().getSongList();
         // find all the mp3 and wav media files on the device
-        final ArrayList<File> mySongs = findSongs(Environment.getExternalStorageDirectory());
+//        final ArrayList<File> mySongs = findSongs(Environment.getExternalStorageDirectory());
+        final ArrayList<File> mySongs = findSongs();
+        Log.i(TAG, "The Number of Songs on the Device is : " + mySongs.size());
         // extract song names from the file names
         items = new String[mySongs.size()];
         for (int i = 0; i < mySongs.size(); i++) {
-            items[i] = mySongs.get(i).getName().toString().replace(".mp3", "").replace(".wav", "");
+            items[i] = mySongs.get(i).getName().toString().replace(".mp3", "").replace(".wav", "").replace(".mpga","").replace(".aac","");
         }
 
         // instantiate array adapter for each list item in the ListView, and register it to the ListView
@@ -80,25 +87,34 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * This method iterates through the directory tree on the device to find all the files that
-     * ends with .mp3 or .wav
-     * @param root directory of the device
+     * ends with .mp3, .wav, .mpga, .aac.
      * @return ArrayList<File> of all the songs found
      */
-    public ArrayList<File> findSongs(File root) {
+    public ArrayList<File> findSongs() {
+        Cursor cursor;
         ArrayList<File> al = new ArrayList<File>();
-        File[] files = root.listFiles();
-        if(files != null){
-            for (File singleFile : files) {
-                if (singleFile.isDirectory() && !singleFile.isHidden()) {
-                    al.addAll(findSongs(singleFile));
-                } else {
-                    if (singleFile.getName().endsWith(".mp3") || singleFile.getName().endsWith(".wav")) {
-                        al.add(singleFile);
-                    }
+        Uri allSongsUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
+        if (isSdPresent()) {
+            cursor = getContentResolver().query(allSongsUri, STAR, selection, null, null);
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    do {
+                        File  song = new File(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
+                        al.add(song);
+                    } while (cursor.moveToNext());
+                    return al;
                 }
+                cursor.close();
             }
         }
-        return al;
+        return null;
+    }
+
+    //Check whether sdcard is present or not
+    private static boolean isSdPresent() {
+        return android.os.Environment.getExternalStorageState().equals(
+                android.os.Environment.MEDIA_MOUNTED);
     }
 
     @Override

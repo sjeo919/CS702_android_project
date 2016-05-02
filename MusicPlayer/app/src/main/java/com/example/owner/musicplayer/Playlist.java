@@ -83,7 +83,7 @@ public class Playlist extends AppCompatActivity implements View.OnClickListener 
     public String[] extractNames(LinkedList<File> list) {
         items = new String[list.size()];
         for (int i = 0; i < list.size(); i++) {
-            items[i] = list.get(i).getName().toString().replace(".mp3", "").replace(".wav", "");
+            items[i] = list.get(i).getName().toString().replace(".mp3", "").replace(".wav", "").replace(".aac","").replace(".mpga","");
         }
         return items;
     }
